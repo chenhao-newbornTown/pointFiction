@@ -1,5 +1,6 @@
 package com.point.service;
 
+import com.point.entity.FictionActorBean;
 import com.point.entity.FictionBean;
 import com.point.entity.FictionDetailBean;
 import com.point.entity.UserFictionBean;
@@ -41,15 +42,17 @@ public interface UserFictionService {
 
     boolean delOneFictionDetail(String id);
 
-    boolean addActorintoFictionInfo(String fiction_id, String actor_name);
+    boolean addActorintoFictionInfo(FictionActorBean fictionActorBean);
 
-    boolean delActorintoFictionInfo(String fiction_id, String actor_name);
+    boolean delActorintoFictionInfo(String fiction_id, String actor_id);
 
     boolean releaseFictionDetail(String fiction_id);
 
-    boolean actordetailisExists(String fiction_id, String actor_name);
+    boolean actordetailisExists(String fiction_id, String actor_id);
 
     List<FictionDetailBean> getFictionDetailInfoByIdForMongo(String fiction_id, String fiction_page_num, int page_num);
+
+    boolean updateActorintoFictionInfo(String fiction_id,String actor_id,String action_name);
 
 
 }

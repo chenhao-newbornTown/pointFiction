@@ -20,7 +20,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hadoop on 2017-7-18.
@@ -214,26 +216,28 @@ public class UserFictionServiceImpl implements UserFictionService {
         }
     }
 
-    public boolean addActorintoFictionInfo(String fiction_id, String actor_name) {
+    public boolean addActorintoFictionInfo(FictionActorBean fictionActorBean) {
         try {
-            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().addToSet("fiction_actors", actor_name), FictionBean.class);
+            //mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().addToSet("fiction_actors", actor_name), FictionBean.class);
+
+            mongoTemplate.insert(fictionActorBean);
             return true;
         } catch (Exception e) {
-            logger.error("delOneFictionDetail is error,fiction_id={},actor_name={}", fiction_id, actor_name);
+            logger.error("delOneFictionDetail is error,fictionActorBean={}", fictionActorBean.toString());
             return false;
         }
     }
 
-    public boolean delActorintoFictionInfo(String fiction_id, String actor_name){
+    public boolean delActorintoFictionInfo(String fiction_id, String actor_id){
         try {
-      //  mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_actors").is(actor_name)),FictionBean.class);
 
-            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))),new Update().pull("fiction_actors", actor_name),FictionBean.class);
+            //mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))),new Update().pull("fiction_actors", actor_name),FictionBean.class);
 
+            mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)),FictionActorBean.class);
 
             return true;
         } catch (Exception e) {
-            logger.error("delActorintoFictionInfo is error,fiction_id={},actor_name={}", fiction_id, actor_name);
+            logger.error("delActorintoFictionInfo is error,fiction_id={},actor_id={}", fiction_id, actor_id);
             return false;
         }
     }
@@ -248,14 +252,28 @@ public class UserFictionServiceImpl implements UserFictionService {
         }
     }
 
-    public boolean actordetailisExists(String fiction_id,String actor_name){
+    public boolean actordetailisExists(String fiction_id,String actor_id){
 
-        FictionDetailBean fictionDetailBean =  mongoTemplate.findOne(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_name").is(actor_name)),FictionDetailBean.class);
+        FictionDetailBean fictionDetailBean =  mongoTemplate.findOne(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)),FictionDetailBean.class);
 
         if(null!=fictionDetailBean){
             return false;
         }
         return true;
+    }
+
+    public boolean updateActorintoFictionInfo(String fiction_id,String actor_id,String action_name){
+
+        try{
+
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_actor_id").is(actor_id)),Update.update("fiction_actor_name",action_name),FictionActorBean.class);
+            mongoTemplate.updateMulti(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)),Update.update("actor_name",action_name),FictionDetailBean.class);
+            return true;
+        }catch (Exception e){
+            logger.error("updateActorintoFictionInfo is error,fiction_id={},actor_id={},action_name={}",fiction_id,actor_id,action_name);
+
+            return false;
+        }
     }
 
 }

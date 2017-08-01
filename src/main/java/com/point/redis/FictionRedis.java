@@ -71,7 +71,6 @@ public class FictionRedis extends BaseRedis {
     public void insertAllFictionIdSetToRedis(String key, List<Long> fiction_id_List, Map<String, FictionInfoBean> fictionid_Maps) {
         redisTemplate.opsForSet().add(key,new Gson().toJson(fiction_id_List));
 
-
         for (Map.Entry<String, FictionInfoBean> fictionInfoBeanEntry : fictionid_Maps.entrySet()) {
 
             redisTemplate.opsForHash().put("fiction_info_all", fictionInfoBeanEntry.getKey(), new Gson().toJson(fictionInfoBeanEntry.getValue()));

@@ -17,11 +17,21 @@ public class FictionDetailBean {
 
     private String actor_fiction_detail;//小说具体内容
 
+    private String actor_id;//小说角色id
+
     private String actor_name;//小说角色名
 
     private long actor_fiction_detail_index;//当前小说的行数
 
     private int fiction_detail_status; //0，未发布，1，已发布
+
+    public String getActor_id() {
+        return actor_id;
+    }
+
+    public void setActor_id(String actor_id) {
+        this.actor_id = actor_id;
+    }
 
     @Override
     public String toString() {

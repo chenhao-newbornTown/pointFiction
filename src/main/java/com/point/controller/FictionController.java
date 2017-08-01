@@ -2,11 +2,13 @@ package com.point.controller;
 
 import com.google.gson.Gson;
 import com.point.config.SaveMongoEventListener;
+import com.point.entity.FictionActorBean;
 import com.point.entity.FictionBean;
 import com.point.entity.FictionDetailBean;
 import com.point.entity.FictionInfoBean;
 import com.point.mongo.FictionRepository;
 import com.point.service.FictionService;
+import com.point.util.PublicUtil;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -108,6 +110,7 @@ public class FictionController {
         XSSFSheet sheet = wb.getSheetAt(0);
 
         List<FictionDetailBean> fictionDetailBeanList = new ArrayList<FictionDetailBean>();
+        List<FictionActorBean> fictionActorBeanList = new ArrayList<FictionActorBean>();
 
         List<String> actor_name_list = new ArrayList<String>();
 
@@ -117,7 +120,7 @@ public class FictionController {
         fictionBean.setFiction_author_id(request.getParameter("fiction_author_id"));
         fictionBean.setFiction_author_name(request.getParameter("fiction_author_name"));
         fictionBean.setFiction_line_num((long) sheet.getLastRowNum());
-        fictionBean.setUpdate_time(new SimpleDateFormat("yyyyMMdd").format(new Date()));
+        fictionBean.setUpdate_time(String.valueOf(System.currentTimeMillis()));
         fictionBean.setFiction_pic_path(request.getParameter("fiction_pic_path"));
         fictionBean.setFiction_status(1);
 
@@ -135,10 +138,17 @@ public class FictionController {
 
             if (!actor_name_list.contains(actor_name)&&!actor_name.equals("旁白")) {
                 actor_name_list.add(actor_name);
+                FictionActorBean fictionActorBean = new FictionActorBean();
+                fictionActorBean.setFiction_id(fiction_id);
+                fictionActorBean.setFiction_actor_id(PublicUtil.makeMD5(String.valueOf(actor_name)));
+                fictionActorBean.setFiction_actor_name(actor_name);
+
+                fictionActorBeanList.add(fictionActorBean);
             }
 
             fictionDetailBean.setFiction_id(fiction_id);
             fictionDetailBean.setActor_fiction_detail(actor_fiction_detail);
+            fictionDetailBean.setActor_id(PublicUtil.makeMD5(String.valueOf(actor_name)));
             fictionDetailBean.setActor_name(actor_name);
             fictionDetailBean.setActor_fiction_detail_index(i);
             fictionDetailBean.setFiction_detail_status(1);
@@ -147,7 +157,7 @@ public class FictionController {
         }
 
         mongoTemplate.insert(fictionDetailBeanList, FictionDetailBean.class);
-        mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(fiction_id)), Update.update("fiction_actors",actor_name_list),FictionBean.class);
+        mongoTemplate.insert(fictionActorBeanList,FictionActorBean.class);
     }
 
 

@@ -6,6 +6,7 @@ import com.point.entity.*;
 import com.point.service.FictionService;
 import com.point.service.UserFictionService;
 import com.point.service.UserService;
+import com.point.util.PublicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -275,7 +276,6 @@ public class UserFictionController {
         String fiction_id = request.getParameter("fiction_id");
         String uid = request.getParameter("uid");
         boolean delstatus = userFictionService.delMyFiction(fiction_id, uid);
-
         return delstatus;
     }
 
@@ -293,6 +293,7 @@ public class UserFictionController {
         String fiction_id = request.getParameter("fiction_id");
         String actor_fiction_detail_index = request.getParameter("actor_fiction_detail_index");
 
+        String actor_id = request.getParameter("actor_id");
         String actor_name = request.getParameter("actor_name");
         String actor_fiction_detail = request.getParameter("actor_fiction_detail");
 
@@ -300,6 +301,7 @@ public class UserFictionController {
 
         fictionDetailBean.setFiction_id(Long.parseLong(fiction_id));
         fictionDetailBean.setActor_fiction_detail(actor_fiction_detail);
+        fictionDetailBean.setActor_id(actor_id);
         fictionDetailBean.setActor_name(actor_name);
         fictionDetailBean.setFiction_detail_status(0);
         fictionDetailBean.setActor_fiction_detail_index(Long.parseLong(actor_fiction_detail_index));
@@ -359,14 +361,25 @@ public class UserFictionController {
      * @return
      */
     @RequestMapping("/addactor")
-    public boolean addActorintoFictionInfo(HttpServletRequest request) {
+    public String addActorintoFictionInfo(HttpServletRequest request) {
         String fiction_id = request.getParameter("fiction_id");
-
         String actor_name = request.getParameter("actor_name");
 
-        boolean addStatus = userFictionService.addActorintoFictionInfo(fiction_id, actor_name);
+        String fiction_actor_id = PublicUtil.makeMD5(actor_name);
 
-        return addStatus;
+        FictionActorBean fictionActorBean = new FictionActorBean();
+        fictionActorBean.setFiction_id(Long.parseLong(fiction_id));
+        fictionActorBean.setFiction_actor_id(fiction_actor_id);
+        fictionActorBean.setFiction_actor_name(actor_name);
+
+       boolean userfictionStatus =  userFictionService.addActorintoFictionInfo(fictionActorBean);
+       if(userfictionStatus){
+           return fiction_actor_id;
+       }else{
+           return null;
+       }
+
+
     }
 
     /**
@@ -374,22 +387,44 @@ public class UserFictionController {
      *
      * @param request
      * @return
-     * @// TODO: 2017-7-27  并判断该角色是否参与过,参与过则不能删除
+     * 判断该角色是否参与过,参与过则不能删除
      */
     @RequestMapping("/delactor")
 
     public String delActorintoFictionInfo(HttpServletRequest request) {
         String fiction_id = request.getParameter("fiction_id");
 
-        String actor_name = request.getParameter("actor_name");
+        String actor_id = request.getParameter("actor_id");
 
-        if(userFictionService.actordetailisExists(fiction_id,actor_name)){
-            boolean addStatus = userFictionService.delActorintoFictionInfo(fiction_id, actor_name);
+        if(userFictionService.actordetailisExists(fiction_id,actor_id)){
+            boolean addStatus = userFictionService.delActorintoFictionInfo(fiction_id, actor_id);
             return String.valueOf(addStatus);
         }else {
             return Constant.DelAcrotNameError;
         }
     }
+
+    /**
+     * 修改一个小说的角色名
+     * @param request
+     * @return
+     */
+    @RequestMapping("updateactor")
+    public boolean updateActorintoFictionInfo(HttpServletRequest request){
+
+        String fiction_id = request.getParameter("fiction_id");
+
+        String actor_id = request.getParameter("actor_id");
+
+        String new_actor_name = request.getParameter("actor_name");
+
+
+        boolean fictionStatus = userFictionService.updateActorintoFictionInfo(fiction_id,actor_id,new_actor_name);
+
+        return fictionStatus;
+    }
+
+
 
 
     /**

@@ -48,11 +48,12 @@ public class UserController {
         String token = request.getParameter("token");
         String uid_str = request.getParameter("uid");
 
-        String md5_token = PublicUtil.makeMD5(token);
-
         if (StringUtils.isEmpty(token)) {
             return Constant.HttpErrorTokenError;
         }
+
+        String md5_token = PublicUtil.makeMD5(token);
+
         UserInfoBean userInfoBean = userService.getUserInfobyToken(token, md5_token);
 
         String timestamp = String.valueOf(request.getAttribute("timestamp"));

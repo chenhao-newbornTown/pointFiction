@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by hadoop on 2017-7-19.
  */
-@Document(collection = "fiction_info")
+@Document(collection = "fiction_info1")
 public class FictionBean {
 
     @Id
@@ -27,7 +27,7 @@ public class FictionBean {
 
     private long read_count;//小说阅读数
     private long like_count;//小说点赞数
-    private List<String> fiction_actors;//小说人物列表，[旁白默认不存]
+ //   private List<String> fiction_actors;//小说人物列表，[旁白默认不存]
 
     private long fiction_line_num;//小说行数
 
@@ -122,13 +122,6 @@ public class FictionBean {
         this.like_count = like_count;
     }
 
-    public List<String> getFiction_actors() {
-        return fiction_actors;
-    }
-
-    public void setFiction_actors(List<String> fiction_actors) {
-        this.fiction_actors = fiction_actors;
-    }
 
     @Override
     public String toString() {
@@ -142,7 +135,6 @@ public class FictionBean {
                 ", fiction_pic_path='" + fiction_pic_path + '\'' +
                 ", read_count=" + read_count +
                 ", like_count=" + like_count +
-                ", fiction_actors=" + fiction_actors +
                 ", fiction_line_num=" + fiction_line_num +
                 ", fiction_status=" + fiction_status +
                 '}';

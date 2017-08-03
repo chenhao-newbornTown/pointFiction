@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by hadoop on 2017-7-19.
  */
-@Document(collection = "fiction_info1")
+@Document(collection = "fiction_info")
 public class FictionBean {
 
     @Id

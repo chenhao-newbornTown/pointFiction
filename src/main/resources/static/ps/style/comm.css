@@ -1,0 +1,112 @@
+html{height:100%}
+body{height:100%}
+.navbar{padding-left:10px;background:#eef3f7;color:#000000;padding:4px;border-bottom:1px solid #bacac6;}
+
+.navbar1{padding-left:10px;background:#eef3f7;color:#000000;padding:4px 0;border-bottom:1px solid #d3e0f3}
+
+.navbar2{padding-left:10px;background:#e2e6e7;color:#000000;padding:4px;border-bottom:1px solid #cccccc}
+
+
+.navbar3{padding-left:10px;background:#ffffff; color:#000000;padding:4px 0;border-bottom:1px solid #cccccc}
+.navbar4{padding-left:10px;background:#ffffff; color:#000000;padding:4px 0;border-bottom:1px solid #cccccc}
+
+.pbox{background: #ffffff url('../framework/images/bubble.png') no-repeat 10px center; padding: 10px; padding-left: 40px; margin:5px;border: 1px dashed #CAE1FF;}
+
+form{margin:0px}
+/*
+.buttonclass1{width:80px;height: 20px;line-height:20px}
+.buttonclass2{width:80px;height: 20px;}
+.buttonclass2 span{height: 20px;line-height:20px;}
+.buttonclass3{width:120px;height: 20px;text-decoration:none;}
+.buttonclass3{width:120px;height: 20px;text-decoration:none;}
+.buttonclass4{text-decoration:none;}
+*/
+.buttonclass3{width:140px}
+.go{ width:40px;height: 20px;}
+
+/* button 
+---------------------------------------------- */
+.button {
+	display: inline-block;
+	zoom: 1; /* zoom and *display = ie7 hack for display:inline-block */
+	*display: inline;
+	vertical-align: baseline;
+	margin: 0 2px;
+	outline: none;
+	cursor: pointer;
+	text-align: center;
+	text-decoration: none;
+	font: 14px/100% Arial, Helvetica, sans-serif;
+	padding: .5em 2em .55em;
+	text-shadow: 0 1px 1px rgba(0,0,0,.3);
+	-webkit-border-radius: .5em; 
+	-moz-border-radius: .5em;
+	border-radius: .5em;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+.button:hover {
+	text-decoration: none;
+}
+.button:active {
+	position: relative;
+	top: 1px;
+}
+
+.bigrounded {
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius: 2em;
+}
+.medium {
+	font-size: 12px;
+	padding: .4em 1.5em .42em;
+}
+.small {
+	font-size: 11px;
+	padding: .2em 1em .275em;
+}
+
+.blue {
+	color: #d9eef7;
+	border: solid 1px #0076a3;
+	background: #0095cd;
+	background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#0078a5));
+	background: -moz-linear-gradient(top,  #00adee,  #0078a5);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#00adee', endColorstr='#0078a5');
+}
+.blue:hover {
+	background: #007ead;
+	background: -webkit-gradient(linear, left top, left bottom, from(#0095cc), to(#00678e));
+	background: -moz-linear-gradient(top,  #0095cc,  #00678e);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0095cc', endColorstr='#00678e');
+}
+.blue:active {
+	color: #80bed6;
+	background: -webkit-gradient(linear, left top, left bottom, from(#0078a5), to(#00adee));
+	background: -moz-linear-gradient(top,  #0078a5,  #00adee);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0078a5', endColorstr='#00adee');
+}
+
+/*
+.TableBgColor
+{
+	BACKGROUND-COLOR: #CDCDCD;
+}
+.TdBgColor1
+{
+	BACKGROUND-COLOR: #efefef;
+}
+.TdBgColor2
+{
+	BACKGROUND-COLOR: #f8f8f8;
+}
+*/
+.Title
+{
+	BACKGROUND-COLOR: #E9F2F9;
+	FONT-SIZE: 12pt;
+	COLOR: #535250
+}
+

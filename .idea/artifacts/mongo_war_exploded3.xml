@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="mongo:war exploded3">
+    <output-path>$PROJECT_DIR$/out/artifacts/mongo_war_exploded3</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="mongo/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="mongo" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

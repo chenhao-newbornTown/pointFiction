@@ -47,19 +47,21 @@ public class UserController {
 
         String token = request.getParameter("token");
         String uid_str = request.getParameter("uid");
+        String mobile_device_num = request.getParameter("mobile_device_num");
 
         if (StringUtils.isEmpty(token)) {
             return Constant.HttpErrorTokenError;
         }
+        if (StringUtils.isEmpty(mobile_device_num)) {
+            return Constant.HttpErrorMobileDeviceNumError;
+        }
 
         String md5_token = PublicUtil.makeMD5(token);
+        String timestamp = String.valueOf(request.getAttribute("timestamp"));
 
         UserInfoBean userInfoBean = userService.getUserInfobyToken(token, md5_token);
 
-        String timestamp = String.valueOf(request.getAttribute("timestamp"));
-        String mobile_device_num = request.getParameter("mobile_device_num");
-
-        Map<String,String> map = new HashMap<String,String>();
+        Map<String, String> map = new HashMap<String, String>();
 
         //新增用户
         if (null == userInfoBean) {
@@ -79,9 +81,9 @@ public class UserController {
             userInfoBean.setNick_name(nick_name);
             uid_str = userService.insertUserInfoToMongo(userInfoBean);
 
-            userService.insertUserTokenToReids(md5_token,uid_str,Constant.REDIS_7_DAYS);
-            map.put("token",md5_token);
-            map.put("uid",uid_str);
+            userService.insertUserTokenToReids(md5_token, uid_str, Constant.REDIS_7_DAYS);
+            map.put("token", md5_token);
+            map.put("uid", uid_str);
 
         } else {
 
@@ -89,18 +91,18 @@ public class UserController {
             String mongo_token = userInfoBean.getToken();
             String mongo_mobile_device_num = userInfoBean.getMobile_device_num();
 
-            if ((mongo_token.equals(token)||mongo_token.equals(md5_token))&&mobile_device_num.equals(mongo_mobile_device_num)) {//同一部手机登录，只更新登录时间
+            if ((mongo_token.equals(token) || mongo_token.equals(md5_token)) && mobile_device_num.equals(mongo_mobile_device_num)) {//同一部手机登录，只更新登录时间
                 userService.updateUserInfoToMongo(mongo_uid_str, timestamp, mobile_device_num, false);
-                userService.insertUserTokenToReids(mongo_token,mongo_uid_str,Constant.REDIS_7_DAYS);
-            }else if((mongo_token.equals(token)||mongo_token.equals(md5_token))&&!mobile_device_num.equals(mongo_mobile_device_num)){//同一帐号，不同平台
+                userService.insertUserTokenToReids(mongo_token, mongo_uid_str, Constant.REDIS_7_DAYS);
+            } else if ((mongo_token.equals(token) || mongo_token.equals(md5_token)) && !mobile_device_num.equals(mongo_mobile_device_num)) {//同一帐号，不同平台
                 userService.updateUserInfoToMongo(mongo_uid_str, timestamp, mobile_device_num, true);
-                userService.insertUserTokenToReids(mongo_token,mongo_uid_str,Constant.REDIS_7_DAYS);
-            }else if((mongo_token.equals(token)||mongo_token.equals(md5_token)&&!StringUtils.isEmpty(uid_str)&&!uid_str.equals(mongo_uid_str))){//token相同，但是uid不相同，则用户不存在
+                userService.insertUserTokenToReids(mongo_token, mongo_uid_str, Constant.REDIS_7_DAYS);
+            } else if ((mongo_token.equals(token) || mongo_token.equals(md5_token) && !StringUtils.isEmpty(uid_str) && !uid_str.equals(mongo_uid_str))) {//token相同，但是uid不相同，则用户不存在
                 return Constant.HttpErrorCodeSocialUserNotExist;
             }
 
-            map.put("token",mongo_token);
-            map.put("uid",mongo_uid_str);
+            map.put("token", mongo_token);
+            map.put("uid", mongo_uid_str);
         }
 
         return gson.toJson(map);

@@ -9,7 +9,7 @@
     <title></title>
 
     <link rel="stylesheet" type="text/css" href="<c:url value='/ps/style/comm.css'/>"/>
-    <link rel="stylesheet" type="text/css" media="all" href="<c:url value='${otherPath}/displaytag.css'/>" />
+    <link rel="stylesheet" type="text/css" media="all" href="<c:url value='${otherPath}/displaydetailtag.css'/>" />
 
 </head>
 
@@ -19,9 +19,16 @@
 
         <display:table name="fictionDetailBeanList" cellspacing="0" cellpadding="0" style="width:100%"
                        requestURI="" id="fdb"
-                       class="list reportsList" >
-            <display:column sortable="true" headerClass="sortable" style="width:10%" title="角色名"><c:out value="${fdb.actor_name}"/></display:column>
-            <display:column sortable="true" headerClass="sortable" style="width:90%" title="内容"><c:out value="${fdb.actor_fiction_detail}"/></display:column>
+                       class="listdetail" >
+            <display:column style="width:10%" title="角色名"><c:out value="${fdb.actor_name}"/></display:column>
+            <display:column style="width:90%" title="内容">
+             <c:if test="${fdb.fiction_detail_status==0}">
+                 <span style="color:#919191;"> <c:out value="${fdb.actor_fiction_detail}"/></span>
+             </c:if>
+                <c:if test="${fdb.fiction_detail_status==1}">
+                    <c:out value="${fdb.actor_fiction_detail}"/>
+                </c:if>
+            </display:column>
 
         </display:table>
     </form>

@@ -1,0 +1,97 @@
+/*
+ * CSS Expandable Menu
+ * @author: Francisco Neves
+ */
+
+/** Reset */
+* { font-family: "museo500", "Arial"; font-size: 12px; list-style: none; margin: 0; padding: 0; outline: 0; text-decoration: none; box-sizing: border-box !important; -webkit-box-sizing: border-box !important; -moz-box-sizing: border-box !important; -ms-box-sizing: border-box !important; }
+
+/**
+ *  START FREEBIE STYLES
+ */
+html body{margin:0px;padding:0px}
+ 	
+#menucontent{overflow:hidden;}
+	/*! Freebie Skelet */
+	#menucontent ul.expmenu { width: 200px; }
+	#menucontent ul.expmenu * { list-style: none; }
+	#menucontent ul.expmenu > li > div.jmenuheader {padding:10px; border-bottom: 1px #396e9f solid;!important }
+	#menucontent ul.expmenu > li:last-child > div.jmenuheader { border-bottom: none; }
+	#menucontent ul.expmenu > li ul li {padding:10px; background-color: #ececec; padding-left:36px;border-bottom: 1px solid #dcdcdc; border-top: 1px solid #fff; color: #727272; text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.8); }
+	#menucontent ul.expmenu > li ul li:last-child { border-bottom: none; }
+	#menucontent ul.expmenu > li ul li.selected { background-color: #f4f4f4; }
+	#menucontent ul.expmenu div.jmenuheader
+	{
+		color: #ffffff;
+		text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.2);
+
+		background: #0099CC; /* Old browsers */
+		background: -moz-linear-gradient(top, #0099CC 0%, #0099CC 100%); /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#0099CC), color-stop(100%,#0099CC)); /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(top, #0099CC 0%,#0099CC 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(top, #0099CC 0%,#0099CC 100%); /* Opera 11.10+ */
+		background: -ms-linear-gradient(top, #0099CC 0%,#0099CC 100%); /* IE10+ */
+		background: linear-gradient(to bottom, #0099CC 0%,#0099CC 100%); /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0099CC', endColorstr='#0099CC',GradientType=0 ); /* IE6-9 */
+		
+		
+		
+		
+	}
+	#menucontent ul.expmenu > li > div.jmenuheader > .label { padding-left: 24px; background: no-repeat;width:180px}
+	#menucontent ul.expmenu > li > div.jmenuheader > .arrow { display: block; width: 16px; height: 16px; background: no-repeat center; float: right; }
+	#menucontent ul.expmenu > li > div.jmenuheader > .arrow.up { background-image: url(../images/arrow_u.png); }
+	#menucontent ul.expmenu > li > div.jmenuheader > .arrow.down { background-image: url(../images/arrow_d.png); }
+
+		/* Mouse Events */
+	#menucontent ul.expmenu div.jmenuheader:hover
+		{
+			background: #4571a0; /* Old browsers */
+			background: -moz-linear-gradient(top, #4d7fb8 0%, #4571a0 100%); /* FF3.6+ */
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4d7fb8), color-stop(100%,#4571a0)); /* Chrome,Safari4+ */
+			background: -webkit-linear-gradient(top, #4d7fb8 0%,#4571a0 100%); /* Chrome10+,Safari5.1+ */
+			background: -o-linear-gradient(top, #4d7fb8 0%,#4571a0 100%); /* Opera 11.10+ */
+			background: -ms-linear-gradient(top, #4d7fb8 0%,#4571a0 100%); /* IE10+ */
+			background: linear-gradient(to bottom, #4d7fb8 0%,#4571a0 100%); /* W3C */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4d7fb8', endColorstr='#4571a0',GradientType=0 ); /* IE6-9 */
+
+			cursor: pointer;
+		}
+
+		 #menucontent ul.expmenu > li ul li:not(.selected):hover
+		{
+			background: #cccccc; /* Old browsers */
+
+			cursor: pointer;
+		}
+		#menucontent ul.expmenu > li ul li:not(.selected):active
+		{
+			background: #f1f1f1; /* Old browsers */
+
+			cursor: pointer;
+		}
+		
+		 #menucontent ul.expmenu > li ul li:hover
+		{
+			background: #DDDDDD; /* Old browsers */
+
+			cursor: pointer;
+		}
+		#menucontent ul.expmenu > li ul li:active
+		{
+			background: #cccccc; /* Old browsers */
+
+			cursor: pointer;
+		}
+/**
+ *  END FREEBIE STYLES
+ */
+	
+
+/**
+ *	Not important styles
+ */
+
+
+
+	

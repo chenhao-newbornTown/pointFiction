@@ -1,0 +1,40 @@
+.table {
+	width: 100%;
+	padding: 0px;
+	margin: 0px;
+	font-family: Arial, Tahoma, Verdana, Sans-Serif, '<fmt:message key="view.st"/>';
+	border-left: 1px solid #ADD8E6;
+	border-collapse: collapse;
+	background-color: #EEEEEE
+}
+/*table top to type*/
+.table th {
+	font-size: 12px;
+	font-weight: 600;
+	color: #303030;
+	border-right: 1px solid #ADD8E6;
+	border-bottom: 1px solid #ADD8E6;
+	border-top: 1px solid #ADD8E6;
+	letter-spacing: 2px;
+	text-align: left;
+	padding: 10px 0px 10px 0px;
+	white-space: nowrap;
+	text-align: center;
+	overflow: hidden;
+}
+/*dan yuan ge yang shi*/
+.table td {
+	border-right: 1px solid #ADD8E6;
+	border-bottom: 1px solid #ADD8E6;
+	background: #EEEEEE;
+	font-size: 12px;
+	padding: 3px 3px 3px 6px;
+	color: #303030;
+	word-break: break-all;
+	word-wrap: break-word;
+	white-space: normal;
+}
+/*lan se dan yuan ge yang shi , zhu yao yong yu ge hang bian se*/
+.table td.color {
+	background: #edf7f9;
+}

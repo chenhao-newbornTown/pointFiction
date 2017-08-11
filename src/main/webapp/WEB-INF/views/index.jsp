@@ -23,10 +23,23 @@
         }
 
     </style>
+
+    <script language=JavaScript>
+        function alertMesg() {
+
+            var msg = document.getElementById("msg").value;
+
+            if (msg != "") {
+                alert(msg);
+            }
+        }
+    </script>
 </head>
 
 
-<body style="background:#9FB6CD">
+<body style="background:#9FB6CD" onload="alertMesg()">
+
+<input id="msg" value="<c:out value="${msg}"/>" type="hidden">
 
 <div style="background:#1ea4d2;height:30px;text-align:left;line-height:30px;padding-left:10px;color:#ffffff">
     dianDianPoint

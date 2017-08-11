@@ -1,5 +1,6 @@
 package com.point.service.impl;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.point.entity.*;
@@ -20,9 +21,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by hadoop on 2017-7-18.
@@ -51,8 +50,8 @@ public class UserFictionServiceImpl implements UserFictionService {
 
         DBObject fields = new BasicDBObject();
         fields.put("_id", false);
+
         fields.put("fiction_id", true);
-        fields.put("fiction_name", true);
         fields.put("user_read_timestamp", true);
 
 
@@ -73,9 +72,9 @@ public class UserFictionServiceImpl implements UserFictionService {
             mongoTemplate.upsert(new Query(Criteria.where("uid").is(userFictionBean.getUid()).and("fiction_id").is(userFictionBean.getFiction_id()).and("fiction_name").is(userFictionBean.getFiction_name())),
                     Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()), userFictionBean.getClass());
 
-
+            //  String key = "user_read_list_" + userFictionBean.getUid();
             // userFictionRedis.removeUserFictionByUid(key);
-            //  userFictionRedis.insertUserFictionBeanListToRedis(key,getUserFictionList(userFictionBean.getUid()));
+            //userFictionRedis.insertUserFictionBeanListToRedis(key, getUserFictionList(String.valueOf(userFictionBean.getUid())));
             return true;
         } catch (Exception e) {
             logger.error("insertUserFictionToMongoAndRedis is exception,UserFictionBean={}", userFictionBean);
@@ -119,8 +118,7 @@ public class UserFictionServiceImpl implements UserFictionService {
             userReadFictionSet.add(userFictionBean.getFiction_id());
 
         }
-        userFictionRedis.insertUserReadFictionSetToRedis(key, userReadFictionSet);
-
+        //  userFictionRedis.insertUserReadFictionSetToRedis(key, userReadFictionSet);
         return userReadFictionSet;
 
     }
@@ -133,9 +131,15 @@ public class UserFictionServiceImpl implements UserFictionService {
         return fictionDetailBeanList;
     }
 
-    public List<FictionDetailBean> getFictionDetailInfoByIdForMongo(String fiction_id, String fiction_page_num,int page_num) {
+    /**
+     * @param fiction_id       小说id
+     * @param fiction_page_num 第几页
+     * @param page_num         每页多少行
+     * @return
+     */
+    public List<FictionDetailBean> getFictionDetailInfoByIdForMongo(String fiction_id, String fiction_page_num, int page_num) {
 
-        List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_fiction_detail_index").gt(Long.parseLong(fiction_page_num)*page_num).lte((Long.parseLong(fiction_page_num)+1)*page_num)),FictionDetailBean.class);
+        List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_fiction_detail_index").gt((Long.parseLong(fiction_page_num) - 1) * page_num).lte((Long.parseLong(fiction_page_num)) * page_num)), FictionDetailBean.class);
 
         return fictionDetailBeanList;
     }
@@ -152,14 +156,14 @@ public class UserFictionServiceImpl implements UserFictionService {
 
     public boolean delMyFiction(String fiction_id, String uid) {
 
-        try{
+        try {
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_author_id").is(uid)), FictionBean.class);
 
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), FictionDetailBean.class);
 
             return true;
-        }catch (Exception e){
-            logger.error("delMyFiction is error,fiction={},uid={}",fiction_id,uid);
+        } catch (Exception e) {
+            logger.error("delMyFiction is error,fiction={},uid={}", fiction_id, uid);
             return false;
         }
 
@@ -228,12 +232,12 @@ public class UserFictionServiceImpl implements UserFictionService {
         }
     }
 
-    public boolean delActorintoFictionInfo(String fiction_id, String actor_id){
+    public boolean delActorintoFictionInfo(String fiction_id, String actor_id) {
         try {
 
             //mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))),new Update().pull("fiction_actors", actor_name),FictionBean.class);
 
-            mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)),FictionActorBean.class);
+            mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)), FictionActorBean.class);
 
             return true;
         } catch (Exception e) {
@@ -242,7 +246,7 @@ public class UserFictionServiceImpl implements UserFictionService {
         }
     }
 
-    public boolean releaseFictionDetail(String fiction_id){
+    public boolean releaseFictionDetail(String fiction_id) {
         try {
             mongoTemplate.updateMulti(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_detail_status").is(0)), Update.update("fiction_detail_status", 1), FictionDetailBean.class);
             return true;
@@ -252,28 +256,48 @@ public class UserFictionServiceImpl implements UserFictionService {
         }
     }
 
-    public boolean actordetailisExists(String fiction_id,String actor_id){
+    public boolean actordetailisExists(String fiction_id, String actor_id) {
 
-        FictionDetailBean fictionDetailBean =  mongoTemplate.findOne(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)),FictionDetailBean.class);
+        FictionDetailBean fictionDetailBean = mongoTemplate.findOne(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)), FictionDetailBean.class);
 
-        if(null!=fictionDetailBean){
+        if (null != fictionDetailBean) {
             return false;
         }
         return true;
     }
 
-    public boolean updateActorintoFictionInfo(String fiction_id,String actor_id,String action_name){
+    public boolean updateActorintoFictionInfo(String fiction_id, String actor_id, String action_name) {
 
-        try{
+        try {
 
-            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_actor_id").is(actor_id)),Update.update("fiction_actor_name",action_name),FictionActorBean.class);
-            mongoTemplate.updateMulti(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)),Update.update("actor_name",action_name),FictionDetailBean.class);
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_actor_id").is(actor_id)), Update.update("fiction_actor_name", action_name), FictionActorBean.class);
+            mongoTemplate.updateMulti(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)), Update.update("actor_name", action_name), FictionDetailBean.class);
             return true;
-        }catch (Exception e){
-            logger.error("updateActorintoFictionInfo is error,fiction_id={},actor_id={},action_name={}",fiction_id,actor_id,action_name);
+        } catch (Exception e) {
+            logger.error("updateActorintoFictionInfo is error,fiction_id={},actor_id={},action_name={}", fiction_id, actor_id, action_name);
 
             return false;
         }
+    }
+
+    public List<FictionDetailBean> getFictionDetailList(String fiction_id) {
+
+//        String[] fiction_ids_Split = fiction_ids.split(",");
+//
+//        DBObject queryObject = new BasicDBObject();
+//        BasicDBList values = new BasicDBList();
+//
+//        for (String fiction_id : fiction_ids_Split) {
+//            values.add(new BasicDBObject("fiction_id", Long.parseLong(fiction_id)));
+//        }
+//        queryObject.put("$or",values);
+//
+//       List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new BasicQuery(queryObject).with(new Sort(new Sort.Order(Sort.Direction.ASC, "actor_fiction_detail_index"))),FictionDetailBean.class);
+
+        List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))).with(new Sort(new Sort.Order(Sort.Direction.ASC, "actor_fiction_detail_index"))), FictionDetailBean.class);
+
+        return fictionDetailBeanList;
+
     }
 
 }

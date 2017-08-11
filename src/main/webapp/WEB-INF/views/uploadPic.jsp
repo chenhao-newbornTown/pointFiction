@@ -27,7 +27,6 @@
 
         var file = document.getElementsByName("file")[0].value;
 
-
         if (file.length > 0) {
             var df = document.picFile;
             var url = "/batchupload";
@@ -36,10 +35,7 @@
         }else {
             alert("请选择要上传的图片!!!")
         }
-
-
     }
-
 
     function delPic(id) {
         if (confirm("确定要删除该图片么?")) {
@@ -86,7 +82,7 @@
             <display:column sortable="true" headerClass="sortable" style="width:10%" title="上传时间"><c:out
                     value="${pic.pic_upload_time}"/></display:column>
             <display:column sortable="true" headerClass="sortable" style="width:10%" title="封面">
-                <img src="http://www.ytoapp.com/<c:out value="${pic.pic_name}"/>" height="180px" width="140px">
+                <img src="<c:out value="${baseurl}"/>/<c:out value="${pic.pic_name}"/>" height="205px" width="115px">
             </display:column>
             <display:column sortable="true" headerClass="sortable" style="width:10%" title="使用次数"><c:out
                     value="${pic.use_pic_num}"/></display:column>

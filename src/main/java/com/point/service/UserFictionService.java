@@ -54,5 +54,7 @@ public interface UserFictionService {
 
     boolean updateActorintoFictionInfo(String fiction_id,String actor_id,String action_name);
 
+    List<FictionDetailBean> getFictionDetailList(String fiction_ids);
+
 
 }

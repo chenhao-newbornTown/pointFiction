@@ -33,6 +33,16 @@ public class FictionBean {
 
     private int fiction_status; //0，未发布，1，已发布，2加入推荐池子
 
+    private String status;//小说状态--->图片被删，小说被删，默认00000
+
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public long getFiction_line_num() {
         return fiction_line_num;

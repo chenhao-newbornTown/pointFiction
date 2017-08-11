@@ -2,6 +2,7 @@ package com.point.controller;
 
 import com.google.gson.Gson;
 import com.point.config.SaveMongoEventListener;
+import com.point.constant.Constant;
 import com.point.entity.FictionActorBean;
 import com.point.entity.FictionBean;
 import com.point.entity.FictionDetailBean;
@@ -36,10 +37,8 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/fiction")
-public class FictionController {
+public class FictionController extends BaseController{
     protected static Logger logger = LoggerFactory.getLogger(FictionController.class);
-
-    String REDIS_KEY = "fiction_idlist_";
 
     Gson gson = new Gson();
 
@@ -64,7 +63,7 @@ public class FictionController {
 
         List<Long> fiction_daily_Set = null;
 
-        String all_key = REDIS_KEY + "all";
+        String all_key = "fiction_idlist_all";
 
         if (fictionService.redisFictionListExists(all_key)) {//查询redis中是否存在所有小说的set集合
             fiction_daily_Set = fictionService.getAllFictionIdListFromReidsByKey(all_key);
@@ -89,77 +88,10 @@ public class FictionController {
 
         String key = "fiction_info_all";
 
-        FictionInfoBean fictionInfoBean = fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id);
+        FictionBean fictionBean = fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id);
 
-        return gson.toJson(fictionInfoBean);
+        return gson.toJson(fictionBean);
     }
-
-    /**
-     * 上传小说
-     *
-     * @param request
-     * @throws Exception
-     */
-    @RequestMapping("/uploadfiction")
-    public void uploadExcelFictionToMongoAndRedis(HttpServletRequest request) throws Exception {
-
-        String xls_path = "F:\\fiction\\松看风云.xlsx";
-
-        XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(ResourceUtils.getFile(xls_path)));
-
-        XSSFSheet sheet = wb.getSheetAt(0);
-
-        List<FictionDetailBean> fictionDetailBeanList = new ArrayList<FictionDetailBean>();
-        List<FictionActorBean> fictionActorBeanList = new ArrayList<FictionActorBean>();
-
-        List<String> actor_name_list = new ArrayList<String>();
-
-        FictionBean fictionBean = new FictionBean();
-
-        fictionBean.setFiction_name("松看风云");
-        fictionBean.setFiction_author_id(request.getParameter("fiction_author_id"));
-        fictionBean.setFiction_author_name(request.getParameter("fiction_author_name"));
-        fictionBean.setFiction_line_num((long) sheet.getLastRowNum());
-        fictionBean.setUpdate_time(String.valueOf(System.currentTimeMillis()));
-        fictionBean.setFiction_pic_path(request.getParameter("fiction_pic_path"));
-        fictionBean.setFiction_status(1);
-
-        FictionBean fictionMongoBean =  fictionRepository.save(fictionBean);
-
-        long fiction_id = fictionMongoBean.getFiction_id();
-
-        for (int i = 1; i < sheet.getLastRowNum() + 1; i++) {
-
-            FictionDetailBean fictionDetailBean = new FictionDetailBean();
-
-            XSSFRow row = sheet.getRow(i);
-            String actor_name = row.getCell(0).getStringCellValue();
-            String actor_fiction_detail = row.getCell(1).getStringCellValue();
-
-            if (!actor_name_list.contains(actor_name)&&!actor_name.equals("旁白")) {
-                actor_name_list.add(actor_name);
-                FictionActorBean fictionActorBean = new FictionActorBean();
-                fictionActorBean.setFiction_id(fiction_id);
-                fictionActorBean.setFiction_actor_id(PublicUtil.makeMD5(String.valueOf(actor_name)));
-                fictionActorBean.setFiction_actor_name(actor_name);
-
-                fictionActorBeanList.add(fictionActorBean);
-            }
-
-            fictionDetailBean.setFiction_id(fiction_id);
-            fictionDetailBean.setActor_fiction_detail(actor_fiction_detail);
-            fictionDetailBean.setActor_id(PublicUtil.makeMD5(String.valueOf(actor_name)));
-            fictionDetailBean.setActor_name(actor_name);
-            fictionDetailBean.setActor_fiction_detail_index(i);
-            fictionDetailBean.setFiction_detail_status(1);
-
-            fictionDetailBeanList.add(fictionDetailBean);
-        }
-
-        mongoTemplate.insert(fictionDetailBeanList, FictionDetailBean.class);
-        mongoTemplate.insert(fictionActorBeanList,FictionActorBean.class);
-    }
-
 
     /**
      * 获取小说的readcount
@@ -179,10 +111,9 @@ public class FictionController {
     }
 
     /**
-     * 获取小说的likecount
-     * 未放入redis
+     * 从redis中获取小说的likecount
      *
-     * @param request
+     *  @param request
      * @return
      */
     @RequestMapping("/getlikecount")
@@ -190,11 +121,12 @@ public class FictionController {
 
         String fiction_id = request.getParameter("fiction_id");
 
-        long like_count = fictionService.getReadAndLikeCountByFictionidFromMongo(fiction_id, "like_count");
+        //long like_count = fictionService.getReadAndLikeCountByFictionidFromMongo(fiction_id, "like_count");
 
-        return String.valueOf(like_count);
+        long like_count = fictionService.getLikeCountFromRedis(fiction_id);
+
+        return returnJsonData(Constant.DataDefault,like_count,"");
     }
-
 
     /**
      * 小说点赞数+1
@@ -207,6 +139,7 @@ public class FictionController {
         String fiction_id = request.getParameter("fiction_id");
 
         fictionService.updateFictionUserLikeCount(fiction_id);
+
     }
 
 
@@ -220,9 +153,10 @@ public class FictionController {
 
         fictionService.deleteRedisBykey(key);
 
-        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis(REDIS_KEY + "all");
+        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
 
-        fictionService.insertFictionListToRedis(key + "info_deatil_", "20170728", "20",fiction_id_List);
+        //小说具体内容存储到redis
+        fictionService.insertFictionListToRedis(key + "info_deatil_", "20",fiction_id_List);
     }
 
 

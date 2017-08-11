@@ -7,11 +7,17 @@ public class UserReadFictionBean {
 
     private long fiction_id;
 
-    private String fiction_name;
-
     private String user_read_timestamp;
 
-    private String fiction_pic_path;
+    private String fiction_name;//小说名称,不可为null
+   // private String fiction_author_name;//小说作者名称
+    private String fiction_pic_path;//小说封面配图名称
+
+//    private long read_count;//小说阅读数
+//    private long like_count;//小说点赞数
+
+
+
 
     public String getFiction_pic_path() {
         return fiction_pic_path;

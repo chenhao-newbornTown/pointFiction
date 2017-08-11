@@ -62,18 +62,22 @@ public class FictionRedis extends BaseRedis {
 
         for (String s : fictionidSetJsonSplit) {
 
-            fiction_daily_Set.add(Long.parseLong(s));
+            if(!StringUtils.isEmpty(s)){
+                fiction_daily_Set.add(Long.parseLong(s));
+            }
+
+
         }
 
         return fiction_daily_Set;
     }
 
-    public void insertAllFictionIdSetToRedis(String key, List<Long> fiction_id_List, Map<String, FictionInfoBean> fictionid_Maps) {
+    public void insertAllFictionIdSetToRedis(String key, List<Long> fiction_id_List, Map<String, FictionBean> fictionid_Maps) {
         redisTemplate.opsForSet().add(key,new Gson().toJson(fiction_id_List));
 
-        for (Map.Entry<String, FictionInfoBean> fictionInfoBeanEntry : fictionid_Maps.entrySet()) {
+        for (Map.Entry<String, FictionBean> fictionBeanEntry : fictionid_Maps.entrySet()) {
 
-            redisTemplate.opsForHash().put("fiction_info_all", fictionInfoBeanEntry.getKey(), new Gson().toJson(fictionInfoBeanEntry.getValue()));
+            redisTemplate.opsForHash().put("fiction_info_all", fictionBeanEntry.getKey(), new Gson().toJson(fictionBeanEntry.getValue()));
         }
     }
 
@@ -86,22 +90,43 @@ public class FictionRedis extends BaseRedis {
         }
     }
 
-    public FictionInfoBean getFictionInfoByFictionidFromRedis(String key,String fiction_id){
+    public FictionBean getFictionInfoByFictionidFromRedis(String key,String fiction_id){
 
       String fictionInfoJson = String.valueOf(redisTemplate.opsForHash().get(key,fiction_id));
 
-        FictionInfoBean fictionInfo = new FictionInfoBean();
+        FictionBean fictionInfo = new FictionBean();
 
         Gson gson = new Gson();
 
         if (StringUtils.isNotEmpty(fictionInfoJson)) {
 
-            fictionInfo = gson.fromJson(fictionInfoJson, new TypeToken<FictionInfoBean>(){}.getType());
+            fictionInfo = gson.fromJson(fictionInfoJson, new TypeToken<FictionBean>(){}.getType());
 
         }
-
         return fictionInfo;
+    }
 
+    public void incReadCount(String fiction_id){
+
+        redisTemplate.opsForValue().increment("readcount_"+fiction_id,1L);
+
+    }
+
+    public void incLikeCount(String fiction_id){
+
+        redisTemplate.opsForValue().increment("likecount_"+fiction_id,1L);
+    }
+
+    public long getLikeCount(String fiction_id){
+
+       Long likecount = 0L;
+
+       String likecountStr = String.valueOf(redisTemplate.opsForValue().get("likecount_"+fiction_id));
+
+       if(!StringUtils.isEmpty(likecountStr)){
+            likecount = Long.parseLong(likecountStr);
+       }
+       return likecount;
 
     }
 

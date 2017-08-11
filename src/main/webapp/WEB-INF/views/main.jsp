@@ -4,7 +4,7 @@
 <%@ include file="glbVariable.jsp"%>
 <html>
 <head>
-    <title>策略超市管理后台</title>
+    <title>dianDianPoint</title>
     <link rel="stylesheet" type="text/css" media="all" href="<c:url value='${eaUIPath}/themes/metro/easyui.css'/>" />
     <link rel="stylesheet" type="text/css" media="all" href="<c:url value='${eaUIPath}/themes/icon.css'/>" />
     <link rel="stylesheet" type="text/css" href="<c:url value='${eaUIPath}/demo.css'/>">
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div  style="font-size:12px;width:40px;color:#ffffff;height:40px;line-height:40px;float:right;padding:8px">
-            <a  class="easyui-linkbutton" data-options="iconCls:'icon-logout'" title="exit" href="<c:url value='/'/>"></a>
+            <a  class="easyui-linkbutton" data-options="iconCls:'icon-logout'" title="exit" href="<c:url value='/admin_login'/>"></a>
 
 
         </div>

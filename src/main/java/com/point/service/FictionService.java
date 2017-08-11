@@ -2,6 +2,7 @@ package com.point.service;
 
 import com.point.entity.FictionBean;
 import com.point.entity.FictionInfoBean;
+import com.point.entity.UserFictionBean;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public interface FictionService {
      * @param key
      * @param page_fiction_num 每页多少个小说
      */
-    void insertFictionListToRedis(String key, String update_time,String page_fiction_num,List<Long> fiction_id_List);
+    void insertFictionListToRedis(String key,String page_fiction_num,List<Long> fiction_id_List);
 
     /**
      *
@@ -47,7 +48,7 @@ public interface FictionService {
     void updateFictionUserReadCount(String fiction_id);
     void updateFictionUserLikeCount(String fiction_id);
 
-    FictionInfoBean getFictionInfoByFictionidFromRedis(String key,String fiction_id);
+    FictionBean getFictionInfoByFictionidFromRedis(String key,String fiction_id);
 
     long getReadAndLikeCountByFictionidFromMongo(String fiction_id,String readOrLike);
 
@@ -59,5 +60,9 @@ public interface FictionService {
     String getFictionPicPathByid(long fiction_id);
 
     void incrFictionLineNum(String fiction_id, int i);
+
+    List<FictionBean> getFictionInfoByFictionidFromMongo(List<UserFictionBean> userFictionBeanList);
+
+    Long getLikeCountFromRedis(String fiction_id);
 
 }

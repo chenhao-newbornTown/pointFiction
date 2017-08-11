@@ -18,6 +18,15 @@ public class PicBean {
 
     public long use_pic_num;
 
+    public String pic_status;//1,admin,2,user
+
+    public String getPic_status() {
+        return pic_status;
+    }
+
+    public void setPic_status(String pic_status) {
+        this.pic_status = pic_status;
+    }
 
     public String getPic_upload_time() {
         return pic_upload_time;

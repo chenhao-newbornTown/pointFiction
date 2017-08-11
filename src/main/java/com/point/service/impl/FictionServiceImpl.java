@@ -1,10 +1,12 @@
 package com.point.service.impl;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.point.entity.FictionBean;
 import com.point.entity.FictionDetailBean;
 import com.point.entity.FictionInfoBean;
+import com.point.entity.UserFictionBean;
 import com.point.mongo.FictionRepository;
 import com.point.redis.FictionRedis;
 import com.point.service.FictionService;
@@ -45,13 +47,13 @@ public class FictionServiceImpl implements FictionService {
     }
 
     @Override
-    public void insertFictionListToRedis(String key, String update_time, String page_fiction_num, List<Long> fiction_id_List) {
+    public void insertFictionListToRedis(String key, String page_fiction_num, List<Long> fiction_id_List) {
 
         int fiction_page_num = Integer.parseInt(page_fiction_num);
 
         for (Long fiction_id : fiction_id_List) {
 
-            List<FictionDetailBean> fictionBeanList = getFictionDeatilListFromMongoByKey(update_time, fiction_id);
+            List<FictionDetailBean> fictionBeanList = getFictionDeatilListFromMongoByKey(fiction_id);
 
             if (null != fictionBeanList && fictionBeanList.size() > 0) {
                 Map<String, List<FictionDetailBean>> map = new HashMap<String, List<FictionDetailBean>>();
@@ -94,10 +96,9 @@ public class FictionServiceImpl implements FictionService {
     /**
      * 获取已加入推荐池部分的小说
      *
-     * @param update_time
      * @return
      */
-    public List<FictionDetailBean> getFictionDeatilListFromMongoByKey(String update_time, Long fiction_id) {
+    public List<FictionDetailBean> getFictionDeatilListFromMongoByKey(Long fiction_id) {
 
         Query query = new Query(Criteria.where("fiction_detail_status").is(1).and("fiction_id").is(fiction_id)).with(new Sort(new Sort.Order(Sort.Direction.ASC, "actor_fiction_detail_index")));
 
@@ -114,6 +115,12 @@ public class FictionServiceImpl implements FictionService {
         return fiction_daily_Set;
     }
 
+    /**
+     * 获取加入推荐池子的小说，并存储到redis中
+     *
+     * @param key
+     * @return
+     */
     @Override
     public List<Long> insertAllFictionIdListToRedis(String key) {
 
@@ -121,20 +128,13 @@ public class FictionServiceImpl implements FictionService {
 
         List<Long> fiction_id_List = new ArrayList<Long>();
 
-        Map<String, FictionInfoBean> fictionid_Maps = new HashMap<String, FictionInfoBean>();
+        Map<String, FictionBean> fictionid_Maps = new HashMap<String, FictionBean>();
 
         for (FictionBean fictionBean : fictionBeanList) {
 
             fiction_id_List.add(fictionBean.getFiction_id());
 
-            FictionInfoBean fictionInfoBean = new FictionInfoBean();
-
-            fictionInfoBean.setFiction_id(fictionBean.getFiction_id());
-            fictionInfoBean.setFiction_name(fictionBean.getFiction_name());
-            fictionInfoBean.setFiction_author_name(fictionBean.getFiction_author_name());
-            fictionInfoBean.setFiction_pic_path(fictionBean.getFiction_pic_path());
-
-            fictionid_Maps.put(String.valueOf(fictionBean.getFiction_id()), fictionInfoBean);
+            fictionid_Maps.put(String.valueOf(fictionBean.getFiction_id()), fictionBean);
         }
 
 
@@ -154,18 +154,45 @@ public class FictionServiceImpl implements FictionService {
     public void updateFictionUserReadCount(String fiction_id) {
         mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("read_count", 1), FictionBean.class);
 
+        fictionRedis.incReadCount(fiction_id);
+
+
     }
 
     public void updateFictionUserLikeCount(String fiction_id) {
         mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("like_count", 1), FictionBean.class);
 
+        fictionRedis.incLikeCount(fiction_id);
+
+    }
+
+    public Long getLikeCountFromRedis(String fiction_id){
+
+        return fictionRedis.getLikeCount(fiction_id);
+
     }
 
     @Override
-    public FictionInfoBean getFictionInfoByFictionidFromRedis(String key, String fiction_id) {
+    public FictionBean getFictionInfoByFictionidFromRedis(String key, String fiction_id) {
 
         return fictionRedis.getFictionInfoByFictionidFromRedis(key, fiction_id);
 
+    }
+
+
+    public List<FictionBean> getFictionInfoByFictionidFromMongo(List<UserFictionBean> userFictionBeanList) {
+
+        DBObject queryObject = new BasicDBObject();
+        BasicDBList values = new BasicDBList();
+
+        for (UserFictionBean userFictionBean : userFictionBeanList) {
+            values.add(new BasicDBObject("fiction_id", userFictionBean.getFiction_id()));
+        }
+        queryObject.put("$or", values);
+
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject), FictionBean.class);
+
+        return fictionBeanList;
     }
 
     public long getReadAndLikeCountByFictionidFromMongo(String fiction_id, String readOrLike) {
@@ -198,9 +225,9 @@ public class FictionServiceImpl implements FictionService {
     }
 
 
-    public boolean releaseFiction(String fiction_id,String timestamp) {
+    public boolean releaseFiction(String fiction_id, String timestamp) {
         try {
-            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_status").is(0)), Update.update("fiction_status", 1).set("update_time",timestamp), FictionBean.class);
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_status").is(0)), Update.update("fiction_status", 1).set("update_time", timestamp), FictionBean.class);
             return true;
         } catch (Exception e) {
             logger.error("releaseFiction is error,fiction_id={}", fiction_id);

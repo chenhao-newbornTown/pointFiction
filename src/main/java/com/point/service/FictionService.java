@@ -65,4 +65,12 @@ public interface FictionService {
 
     Long getLikeCountFromRedis(String fiction_id);
 
+    void getMongoPicToRedis(String key);
+
+    List<String> getPicListFromRedis(String key);
+
+    void getMongoSensitiveWordsToRedis(String key);
+
+    List<String> getMongoSensitiveWordsFromRedis(String key);
+
 }

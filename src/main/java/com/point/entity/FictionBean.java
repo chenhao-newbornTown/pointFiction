@@ -23,6 +23,7 @@ public class FictionBean {
     private String fiction_author_id;//小说作者id
     private String fiction_author_name;//小说作者名称
     private String update_time;//小说上传/更新时间时间
+    private String update_date;//小说上传/更新时间时间
     private String fiction_pic_path;//小说封面配图名称
 
     private long read_count;//小说阅读数
@@ -35,6 +36,13 @@ public class FictionBean {
 
     private String status;//小说状态--->图片被删，小说被删，默认00000
 
+    public String getUpdate_date() {
+        return update_date;
+    }
+
+    public void setUpdate_date(String update_date) {
+        this.update_date = update_date;
+    }
 
     public String getStatus() {
         return status;

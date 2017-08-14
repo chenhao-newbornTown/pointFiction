@@ -1,6 +1,7 @@
 package com.point.controller;
 
 import com.google.gson.Gson;
+import org.parboiled.common.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +12,14 @@ import java.util.Map;
 public class BaseController {
 
 
-    public String returnJsonData(String code, Object data,String msg){
+    public String returnJsonData(String code, Object data, String msg) {
 
-        Map<String,Object> jsonMap = new HashMap<String,Object>();
+        Map<String, Object> jsonMap = new HashMap<String, Object>();
 
-        jsonMap.put("code",code);
-        jsonMap.put("data",data);
-        jsonMap.put("msg",msg);
+        jsonMap.put("code", code);
+        jsonMap.put("data", data);
+
+        jsonMap.put("msg", msg);
 
         Gson gson = new Gson();
 

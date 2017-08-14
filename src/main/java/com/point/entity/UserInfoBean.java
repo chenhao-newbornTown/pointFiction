@@ -36,7 +36,6 @@ public class UserInfoBean {
     private String token;
 
     @NotNull
-    @Indexed(unique = true)
     private String mobile_device_num;//手机设备号
 
 

@@ -3,13 +3,11 @@ package com.point.service.impl;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.point.entity.FictionBean;
-import com.point.entity.FictionDetailBean;
-import com.point.entity.FictionInfoBean;
-import com.point.entity.UserFictionBean;
+import com.point.entity.*;
 import com.point.mongo.FictionRepository;
 import com.point.redis.FictionRedis;
 import com.point.service.FictionService;
+import javafx.scene.shape.Circle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -166,7 +165,7 @@ public class FictionServiceImpl implements FictionService {
 
     }
 
-    public Long getLikeCountFromRedis(String fiction_id){
+    public Long getLikeCountFromRedis(String fiction_id) {
 
         return fictionRedis.getLikeCount(fiction_id);
 
@@ -228,6 +227,10 @@ public class FictionServiceImpl implements FictionService {
     public boolean releaseFiction(String fiction_id, String timestamp) {
         try {
             mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_status").is(0)), Update.update("fiction_status", 1).set("update_time", timestamp), FictionBean.class);
+
+
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time", timestamp).set("update_date",new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").format(new Date())), FictionBean.class);
+
             return true;
         } catch (Exception e) {
             logger.error("releaseFiction is error,fiction_id={}", fiction_id);
@@ -245,7 +248,7 @@ public class FictionServiceImpl implements FictionService {
         DBObject fields = new BasicDBObject();
 
         fields.put("_id", false);
-        fields.put("fiction_pic_path", "true");
+        fields.put("fiction_pic_path", true);
 
         FictionBean fictionBean = mongoTemplate.findOne(new BasicQuery(query, fields), FictionBean.class);
 
@@ -261,6 +264,42 @@ public class FictionServiceImpl implements FictionService {
         } catch (Exception e) {
             logger.error("incrFictionLineNum is error,fiction_id={}", fiction_id);
         }
+    }
+
+    public void getMongoPicToRedis(String key) {
+
+        List<PicBean> picBeanList = mongoTemplate.find(new Query(Criteria.where("pic_status").is("2")).with(new Sort(new Sort.Order(Sort.Direction.DESC, "pic_upload_time"))), PicBean.class);
+
+        if (null != picBeanList && picBeanList.size() > 0) {
+
+            fictionRedis.insertPicToRedis(key, picBeanList);
+        }
+    }
+
+    public List<String> getPicListFromRedis(String key) {
+
+        List<String> picList = fictionRedis.getPicListFromRedis(key);
+
+        return picList;
+    }
+
+    public void getMongoSensitiveWordsToRedis(String key){
+
+        DBObject fields = new BasicDBObject();
+
+        fields.put("_id", false);
+        fields.put("words", true);
+
+        SensitiveWordsBean sensitiveWordsBean =  mongoTemplate.findOne(new BasicQuery(new BasicDBObject(),fields),SensitiveWordsBean.class);
+
+        fictionRedis.insertSensitiveWordsToRedis(key,sensitiveWordsBean.getWords());
+    }
+
+    public List<String> getMongoSensitiveWordsFromRedis(String key) {
+
+        List<String> sensitiveWordsList = fictionRedis.getSensitiveWordsFromRedis(key);
+
+        return sensitiveWordsList;
     }
 
 

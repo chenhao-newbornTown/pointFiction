@@ -74,6 +74,8 @@
 
     }
 
+
+
 </script>
 
 
@@ -130,11 +132,9 @@
                        requestURI="" id="fb" pagesize="50"
                        class="list reportsList">
 
-            <display:column style="width:5%" title="更新时间">
-                <fmt:parseDate value="${fb.update_time}" var="date" pattern="yyyyMMddHHmmss"/>
-                <fmt:formatDate value="${date}" pattern="yyyy-MM-dd HH:mm:ss"/>
+            <display:column style="width:5%" title="更新时间" >
 
-
+                <c:out value="${fb.update_date}"/>
             </display:column>
             <display:column style="width:10%" title="封面">
                 <img src="<c:out value="${baseurl}"/>/<c:out value="${fb.fiction_pic_path}"/>" height="205px"

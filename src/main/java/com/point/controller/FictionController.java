@@ -37,7 +37,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/fiction")
-public class FictionController extends BaseController{
+public class FictionController extends BaseController {
     protected static Logger logger = LoggerFactory.getLogger(FictionController.class);
 
     Gson gson = new Gson();
@@ -113,7 +113,7 @@ public class FictionController extends BaseController{
     /**
      * 从redis中获取小说的likecount
      *
-     *  @param request
+     * @param request
      * @return
      */
     @RequestMapping("/getlikecount")
@@ -125,7 +125,7 @@ public class FictionController extends BaseController{
 
         long like_count = fictionService.getLikeCountFromRedis(fiction_id);
 
-        return returnJsonData(Constant.DataDefault,like_count,"");
+        return returnJsonData(Constant.DataDefault, like_count, "");
     }
 
     /**
@@ -153,10 +153,37 @@ public class FictionController extends BaseController{
 
         fictionService.deleteRedisBykey(key);
 
-        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
+        List<Long> fiction_id_List = fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
 
         //小说具体内容存储到redis
-        fictionService.insertFictionListToRedis(key + "info_deatil_", "20",fiction_id_List);
+        fictionService.insertFictionListToRedis(key + "info_deatil_", "20", fiction_id_List);
+
+        fictionService.getMongoPicToRedis(key+"pics");
+
+        fictionService.getMongoSensitiveWordsToRedis(key+"sensitivewords");
+
+
+    }
+
+    /**
+     * 拉取用户创建小说时待选的图片id
+     * @return
+     */
+    @RequestMapping("/getpiclist")
+    @ResponseBody
+    public String getPicListFromRedis() {
+
+        List<String> picList = fictionService.getPicListFromRedis("fiction_pics");
+
+        return returnJsonData(Constant.DataDefault,picList,"");
+    }
+
+    @RequestMapping("/getmongosensitivewords")
+    @ResponseBody
+    public String getMongoSensitiveWords(){
+        List<String> sensitiveWordsList = fictionService.getMongoSensitiveWordsFromRedis("fiction_sensitivewords");
+
+        return returnJsonData(Constant.DataDefault,sensitiveWordsList,"");
     }
 
 

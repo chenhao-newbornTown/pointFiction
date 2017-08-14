@@ -52,9 +52,13 @@ public interface UserFictionService {
 
     List<FictionDetailBean> getFictionDetailInfoByIdForMongo(String fiction_id, String fiction_page_num, int page_num);
 
-    boolean updateActorintoFictionInfo(String fiction_id,String actor_id,String action_name);
+    boolean updateActorintoFictionInfo(String fiction_id, String actor_id, String action_name);
 
     List<FictionDetailBean> getFictionDetailList(String fiction_ids);
+
+    long getMyFictionCount(String uid);
+
+    List<FictionBean> getMyFictionByUidLimit(String uid, int page_num);
 
 
 }

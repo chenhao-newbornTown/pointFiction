@@ -150,9 +150,17 @@ public class UserFictionServiceImpl implements UserFictionService {
 
         List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_author_id").is(uid)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
+        return fictionBeanList;
+    }
+
+
+    public List<FictionBean> getMyFictionByUidLimit(String uid,int page_num) {
+
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_author_id").is(uid)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))).limit(20).skip(20*(page_num-1)), FictionBean.class);
 
         return fictionBeanList;
     }
+
 
     public boolean delMyFiction(String fiction_id, String uid) {
 
@@ -160,6 +168,8 @@ public class UserFictionServiceImpl implements UserFictionService {
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_author_id").is(uid)), FictionBean.class);
 
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), FictionDetailBean.class);
+
+            mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), FictionActorBean.class);
 
             return true;
         } catch (Exception e) {
@@ -299,5 +309,14 @@ public class UserFictionServiceImpl implements UserFictionService {
         return fictionDetailBeanList;
 
     }
+
+    public long getMyFictionCount(String uid){
+
+        long myFictionCount = mongoTemplate.count(new Query(Criteria.where("fiction_author_id").is(uid)),FictionBean.class);
+
+        return myFictionCount;
+
+    }
+
 
 }

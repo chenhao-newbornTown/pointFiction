@@ -30,6 +30,10 @@ public class PonitFictionScheduled {
         //小说具体内容存储到redis
         fictionService.insertFictionListToRedis(key + "info_deatil_", "20",fiction_id_List);
 
+        fictionService.getMongoPicToRedis(key+"pics");
+
+        fictionService.getMongoSensitiveWordsToRedis(key+"sensitivewords");
+
         logger.info("PonitFictionScheduled----->executePutDataToRedis is End !!!");
     }
 

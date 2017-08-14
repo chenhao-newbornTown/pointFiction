@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -126,6 +127,7 @@ public class UserFictionController extends BaseController {
     /**
      * 返回小说的某一页
      * 此处是redis中行没有，则去库中查询那一行，然后返回，并没有放在redis中
+     *
      * @param request
      * @return
      */
@@ -198,6 +200,10 @@ public class UserFictionController extends BaseController {
 
         List<UserFictionBean> userFictionBeanList = userFictionService.getUserFictionList(uid);
 
+        if(null ==userFictionBeanList||userFictionBeanList.size()<=0){
+            return returnJsonData(Constant.DataDefault, "", "");
+        }
+
         List<FictionBean> fictionBeanList = fictionService.getFictionInfoByFictionidFromMongo(userFictionBeanList);
 
         List<UserReadFictionBean> userReadFictionBeanArrayList = new ArrayList<UserReadFictionBean>();
@@ -222,8 +228,26 @@ public class UserFictionController extends BaseController {
                 }
             }
         }
-        return returnJsonData(Constant.DataDefault,userReadFictionBeanArrayList,"");
+        return returnJsonData(Constant.DataDefault, userReadFictionBeanArrayList, "");
     }
+
+
+    @RequestMapping("/getmyfictioncount")
+    @ResponseBody
+    public String getMyFictionCount(HttpServletRequest request){
+
+        String uid = request.getParameter("uid");
+
+        if (StringUtils.isEmpty(uid)) {
+            return returnJsonData(Constant.DataError, "", Constant.FictionUidError);
+        }
+
+        long myFictionCount = userFictionService.getMyFictionCount(uid);
+
+        return  returnJsonData(Constant.DataDefault,myFictionCount,"");
+
+    }
+
 
 
     /**
@@ -245,9 +269,11 @@ public class UserFictionController extends BaseController {
             return returnJsonData(Constant.DataError, "", Constant.FictionUidError);
         }
 
-        List<FictionBean> fictionBeanList = userFictionService.getMyFictionByUid(uid);
+        int page_num = Integer.parseInt(request.getParameter("page_num"));
 
-        return returnJsonData(Constant.DataDefault,fictionBeanList,"");
+        List<FictionBean> fictionBeanList = userFictionService.getMyFictionByUidLimit(uid,page_num);//getMyFictionByUid(uid);
+
+        return returnJsonData(Constant.DataDefault, fictionBeanList, "");
     }
 
 
@@ -277,7 +303,7 @@ public class UserFictionController extends BaseController {
         map.put("fiction_page_num", start_fiction_page_num);
         map.put("fiction_detail", fictionDetailBeanList);
 
-        return gson.toJson(map);
+        return returnJsonData(Constant.DataDefault,map,"");
     }
 
 
@@ -290,6 +316,7 @@ public class UserFictionController extends BaseController {
      * @return
      */
     @RequestMapping("/getfictionpreviousinfo")
+    @ResponseBody
     public String getFictionPreviousDetail(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
@@ -297,12 +324,12 @@ public class UserFictionController extends BaseController {
 
         long page_num = 20;
 
-        long start_fiction_detail_num = (fiction_page_num / page_num) * page_num;
+        long start_fiction_detail_num = (fiction_page_num-1) * page_num;
         long end_fiction_detail_num = start_fiction_detail_num + page_num;
 
         List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionPreviousDetailFromMongo(fiction_id, start_fiction_detail_num, end_fiction_detail_num);
 
-        return gson.toJson(fictionDetailBeanList);
+        return returnJsonData(Constant.DataDefault,fictionDetailBeanList,"");
 
     }
 
@@ -313,6 +340,7 @@ public class UserFictionController extends BaseController {
      * @return
      */
     @RequestMapping("/createfiction")
+    @ResponseBody
     public String createFiction(HttpServletRequest request) {
 
         String uid = request.getParameter("uid");
@@ -327,12 +355,18 @@ public class UserFictionController extends BaseController {
         fictionBean.setFiction_author_id(uid);
         fictionBean.setFiction_author_name(userService.getNickNameByUid(uid));
         fictionBean.setUpdate_time(update_time);
+        fictionBean.setUpdate_date(new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").format(new Date()));
         fictionBean.setFiction_pic_path(fiction_pic_path);
+        fictionBean.setFiction_line_num(0);
         fictionBean.setFiction_status(0);
 
         FictionBean fictionMongoBean = fictionService.saveFiction(fictionBean);
 
-        return gson.toJson(fictionMongoBean);
+        if(null !=fictionMongoBean){
+            return  returnJsonData(Constant.DataDefault,fictionMongoBean,Constant.AddFictionSuccessed);
+        }else {
+            return returnJsonData(Constant.DataError,"",Constant.AddFictionFailed);
+        }
     }
 
     /**
@@ -341,12 +375,17 @@ public class UserFictionController extends BaseController {
      * @param request
      */
     @RequestMapping("/delmyfiction")
-    public boolean delFiction(HttpServletRequest request) {
+    @ResponseBody
+    public String delFiction(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
         String uid = request.getParameter("uid");
         boolean delstatus = userFictionService.delMyFiction(fiction_id, uid);
-        return delstatus;
+        if (delstatus) {
+            return returnJsonData(Constant.DataDefault, "", Constant.DelFictionSuccessed);
+        } else {
+            return returnJsonData(Constant.DataError, "", Constant.DelFictionFailed);
+        }
     }
 
     /**
@@ -380,9 +419,12 @@ public class UserFictionController extends BaseController {
 
         if (null != id) {
             fictionService.incrFictionLineNum(fiction_id, 1);
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("fiction_detail_id", id);
+            return returnJsonData(Constant.DataDefault, map, Constant.addOneLineFictionDetailSuccessed);
+        } else {
+            return returnJsonData(Constant.DataError, "", Constant.addOneLineFictionDetailFailed);
         }
-
-        return id;
     }
 
 
@@ -394,14 +436,18 @@ public class UserFictionController extends BaseController {
      */
     @RequestMapping("/updateonefictiondetail")
     @ResponseBody
-    public boolean updateOneFictionDetail(HttpServletRequest request) {
+    public String updateOneFictionDetail(HttpServletRequest request) {
 
-        String id = request.getParameter("id");
+        String id = request.getParameter("fiction_detail_id");
         String actor_fiction_detail = request.getParameter("actor_fiction_detail");
 
         boolean updateStatus = userFictionService.updateOneFictionDetail(id, actor_fiction_detail);
 
-        return updateStatus;
+        if (updateStatus) {
+            return returnJsonData(Constant.DataDefault, "", Constant.editOneLineFictionDetailSuccessed);
+        } else {
+            return returnJsonData(Constant.DataError, "", Constant.editOneLineFictionDetailFailed);
+        }
     }
 
     /**
@@ -412,16 +458,18 @@ public class UserFictionController extends BaseController {
      */
     @RequestMapping("/delonefictiondetail")
     @ResponseBody
-    public boolean delOneFictionDetail(HttpServletRequest request) {
+    public String delOneFictionDetail(HttpServletRequest request) {
 
-        String id = request.getParameter("id");
+        String id = request.getParameter("fiction_detail_id");
         boolean updateStatus = userFictionService.delOneFictionDetail(id);
         String fiction_id = request.getParameter("fiction_id");
         if (updateStatus) {
             fictionService.incrFictionLineNum(fiction_id, -1);
+            return returnJsonData(Constant.DataDefault, "", Constant.delOneLineFictionDetailSuccessed);
+        } else {
+            return returnJsonData(Constant.DataError, "", Constant.delOneLineFictionDetailFailed);
         }
 
-        return updateStatus;
     }
 
     /**
@@ -431,6 +479,7 @@ public class UserFictionController extends BaseController {
      * @return
      */
     @RequestMapping("/addactor")
+    @ResponseBody
     public String addActorintoFictionInfo(HttpServletRequest request) {
         String fiction_id = request.getParameter("fiction_id");
         String actor_name = request.getParameter("actor_name");
@@ -444,9 +493,14 @@ public class UserFictionController extends BaseController {
 
         boolean userfictionStatus = userFictionService.addActorintoFictionInfo(fictionActorBean);
         if (userfictionStatus) {
-            return fiction_actor_id;
+
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("actor_name", actor_name);
+            map.put("actor_id", fiction_actor_id);
+
+            return returnJsonData(Constant.DataDefault, map, Constant.AddActorSuccessed);
         } else {
-            return null;
+            return returnJsonData(Constant.DataError, "", Constant.AddActorFailed);
         }
 
 
@@ -459,7 +513,7 @@ public class UserFictionController extends BaseController {
      * @return 判断该角色是否参与过, 参与过则不能删除
      */
     @RequestMapping("/delactor")
-
+    @ResponseBody
     public String delActorintoFictionInfo(HttpServletRequest request) {
         String fiction_id = request.getParameter("fiction_id");
 
@@ -467,9 +521,13 @@ public class UserFictionController extends BaseController {
 
         if (userFictionService.actordetailisExists(fiction_id, actor_id)) {
             boolean addStatus = userFictionService.delActorintoFictionInfo(fiction_id, actor_id);
-            return String.valueOf(addStatus);
-        } else {
-            return Constant.DelAcrotNameError;
+            if(addStatus){
+                return returnJsonData(Constant.DataDefault, "", Constant.delActorSuccessed);
+            } else {
+            return returnJsonData(Constant.DataError, "", Constant.delActorFailed);
+            }
+        }else {
+            return returnJsonData(Constant.DataError, "", Constant.DelAcrotNameError);
         }
     }
 
@@ -480,7 +538,8 @@ public class UserFictionController extends BaseController {
      * @return
      */
     @RequestMapping("updateactor")
-    public boolean updateActorintoFictionInfo(HttpServletRequest request) {
+    @ResponseBody
+    public String updateActorintoFictionInfo(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
 
@@ -488,10 +547,16 @@ public class UserFictionController extends BaseController {
 
         String new_actor_name = request.getParameter("actor_name");
 
-
         boolean fictionStatus = userFictionService.updateActorintoFictionInfo(fiction_id, actor_id, new_actor_name);
 
-        return fictionStatus;
+        if (fictionStatus) {
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("actor_name", new_actor_name);
+            map.put("actor_id", actor_id);
+            return returnJsonData(Constant.DataDefault, map, Constant.editActorSuccessed);
+        } else {
+            return returnJsonData(Constant.DataError, "", Constant.editActorFailed);
+        }
     }
 
 
@@ -504,7 +569,8 @@ public class UserFictionController extends BaseController {
      * @return
      */
     @RequestMapping("/releasefiction")
-    public boolean releaseFiction(HttpServletRequest request) {
+    @ResponseBody
+    public String releaseFiction(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
 
@@ -513,8 +579,11 @@ public class UserFictionController extends BaseController {
         boolean fictionDetailStatus = userFictionService.releaseFictionDetail(fiction_id);
         boolean fictionStatus = fictionService.releaseFiction(fiction_id, timestamp);
 
-
-        return fictionDetailStatus && fictionStatus;
+        if(fictionDetailStatus && fictionStatus){
+            return returnJsonData(Constant.DataDefault,"",Constant.ReleaseFictionSuccessed);
+        }else {
+            return returnJsonData(Constant.DataError,"",Constant.ReleaseFictionFailed);
+        }
 
     }
 

@@ -52,33 +52,36 @@ public class FictionServiceImpl implements FictionService {
 
         for (Long fiction_id : fiction_id_List) {
 
-            List<FictionDetailBean> fictionBeanList = getFictionDeatilListFromMongoByKey(fiction_id);
-
-            if (null != fictionBeanList && fictionBeanList.size() > 0) {
-                Map<String, List<FictionDetailBean>> map = new HashMap<String, List<FictionDetailBean>>();
-
-                List<FictionDetailBean> fictionDeatilBeanList = null;
-
-                for (int i = 0; i < fictionBeanList.size(); i++) {
-
-                    FictionDetailBean fictionDetailBean = fictionBeanList.get(i);
-
-                    String mapkey = String.valueOf((i / fiction_page_num) + 1) + "_" + fictionDetailBean.getFiction_id();
-
-                    if (map.containsKey(mapkey)) {
-                        fictionDeatilBeanList = map.get(mapkey);
-                    } else {
-                        fictionDeatilBeanList = new ArrayList<FictionDetailBean>();
-                    }
-                    fictionDeatilBeanList.add(fictionDetailBean);
-                    map.put(mapkey, fictionDeatilBeanList);
-                }
-
-                fictionRedis.insertFictionListToRedis(key, map);
-            }
+            insertFictionDetailToRedis(fiction_id,fiction_page_num,key);
         }
+    }
 
 
+    public void insertFictionDetailToRedis(Long fiction_id,int fiction_page_num,String key){
+        List<FictionDetailBean> fictionBeanList = getFictionDeatilListFromMongoByKey(fiction_id);
+
+        if (null != fictionBeanList && fictionBeanList.size() > 0) {
+            Map<String, List<FictionDetailBean>> map = new HashMap<String, List<FictionDetailBean>>();
+
+            List<FictionDetailBean> fictionDeatilBeanList = null;
+
+            for (int i = 0; i < fictionBeanList.size(); i++) {
+
+                FictionDetailBean fictionDetailBean = fictionBeanList.get(i);
+
+                String mapkey = String.valueOf((i / fiction_page_num) + 1) + "_" + fictionDetailBean.getFiction_id();
+
+                if (map.containsKey(mapkey)) {
+                    fictionDeatilBeanList = map.get(mapkey);
+                } else {
+                    fictionDeatilBeanList = new ArrayList<FictionDetailBean>();
+                }
+                fictionDeatilBeanList.add(fictionDetailBean);
+                map.put(mapkey, fictionDeatilBeanList);
+            }
+
+            fictionRedis.insertFictionListToRedis(key, map);
+        }
     }
 
     @Override
@@ -175,19 +178,17 @@ public class FictionServiceImpl implements FictionService {
     public FictionBean getFictionInfoByFictionidFromRedis(String key, String fiction_id) {
 
         return fictionRedis.getFictionInfoByFictionidFromRedis(key, fiction_id);
-
     }
 
 
     public List<FictionBean> getFictionInfoByFictionidFromMongo(List<UserFictionBean> userFictionBeanList) {
 
-        DBObject queryObject = new BasicDBObject();
         BasicDBList values = new BasicDBList();
 
         for (UserFictionBean userFictionBean : userFictionBeanList) {
             values.add(new BasicDBObject("fiction_id", userFictionBean.getFiction_id()));
         }
-        queryObject.put("$or", values);
+        DBObject queryObject = new BasicDBObject("$or", values);
 
         List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject), FictionBean.class);
 
@@ -229,7 +230,7 @@ public class FictionServiceImpl implements FictionService {
             mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_status").is(0)), Update.update("fiction_status", 1).set("update_time", timestamp), FictionBean.class);
 
 
-            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time", timestamp).set("update_date",new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").format(new Date())), FictionBean.class);
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time", timestamp).set("update_date",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
 
             return true;
         } catch (Exception e) {
@@ -300,6 +301,23 @@ public class FictionServiceImpl implements FictionService {
         List<String> sensitiveWordsList = fictionRedis.getSensitiveWordsFromRedis(key);
 
         return sensitiveWordsList;
+    }
+
+    public void insertUserLikeCount(String uid,String fiction_id){
+
+        mongoTemplate.upsert(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(Long.parseLong(fiction_id))),Update.update("user_like_count","1"),UserFictionBean.class);
+
+    }
+
+    public String getUserLikeCountStatus(String uid,String fiction_id){
+
+        UserFictionBean userFictionBean = mongoTemplate.findOne(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(Long.parseLong(fiction_id))),UserFictionBean.class);
+
+        if(null == userFictionBean){
+            return "0";
+        }else {
+            return userFictionBean.getUser_like_count();
+        }
     }
 
 

@@ -23,7 +23,7 @@
             <display:column style="width:10%" title="角色名"><c:out value="${fdb.actor_name}"/></display:column>
             <display:column style="width:90%" title="内容">
              <c:if test="${fdb.fiction_detail_status==0}">
-                 <span style="color:#919191;"> <c:out value="${fdb.actor_fiction_detail}"/></span>
+                 <span style="color:indianred;"> <c:out value="${fdb.actor_fiction_detail}"/></span>
              </c:if>
                 <c:if test="${fdb.fiction_detail_status==1}">
                     <c:out value="${fdb.actor_fiction_detail}"/>

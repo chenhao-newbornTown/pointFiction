@@ -8,8 +8,6 @@
     <link rel="stylesheet" type="text/css" media="all" href="<c:url value='${eaUIPath}/themes/metro/easyui.css'/>" />
     <link rel="stylesheet" type="text/css" media="all" href="<c:url value='${eaUIPath}/themes/icon.css'/>" />
     <link rel="stylesheet" type="text/css" href="<c:url value='${eaUIPath}/demo.css'/>">
-    <script language="javascript" type="text/javascript"
-            src="<c:url value='ps/uitl/My97DatePicker/WdatePicker.js'/>"></script>
     <script type="text/javascript" src="<c:url value='${eaUIPath}/jquery.min.js'/>"></script>
     <script type="text/javascript" src="<c:url value='${eaUIPath}/jquery.easyui.min.js'/>"></script>
     <script type="text/javascript" src="<c:url value='${eaUIPath}/layoutfullORnot.js'/>"></script>

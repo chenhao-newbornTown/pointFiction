@@ -6,6 +6,7 @@ import com.point.constant.Constant;
 import com.point.entity.*;
 import com.point.mongo.FictionRepository;
 import com.point.mongo.PicRepostitory;
+import com.point.redis.FictionRedis;
 import com.point.util.PublicUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -19,6 +20,7 @@ import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -176,7 +178,7 @@ public class WebController {
 
     @RequestMapping("/uploadpic")
     public ModelAndView uploadPic() {
-        List<PicBean> picBeanMongoList = mongoTemplate.find(new Query().with(new Sort(new Sort.Order(Sort.Direction.DESC, "pic_upload_time"))), PicBean.class);
+        List<PicBean> picBeanMongoList = mongoTemplate.find(new Query(Criteria.where("pic_status").is("2")).with(new Sort(new Sort.Order(Sort.Direction.DESC, "pic_upload_time"))), PicBean.class);
 
         ModelAndView modelAndView = new ModelAndView("uploadPic");
 
@@ -205,7 +207,7 @@ public class WebController {
                 }
             }
         }
-        List<PicBean> picBeanMongoList = mongoTemplate.find(new Query().with(new Sort(new Sort.Order(Sort.Direction.DESC, "pic_upload_time"))), PicBean.class);
+        List<PicBean> picBeanMongoList = mongoTemplate.find(new Query(Criteria.where("pic_status").is("2")).with(new Sort(new Sort.Order(Sort.Direction.DESC, "pic_upload_time"))), PicBean.class);
 
         ModelAndView modelAndView = new ModelAndView("uploadPic");
 
@@ -267,6 +269,11 @@ public class WebController {
         return modelAndView;
     }
 
+    /**
+     * 更新小说的图片或者内容
+     * @param request
+     * @return
+     */
     @RequestMapping("/updatepicandfiction")
     public ModelAndView fileAndFictionUpdate(HttpServletRequest request) {
 
@@ -344,12 +351,12 @@ public class WebController {
     public ModelAndView delFiction(FictionBean fictionBean, @RequestParam("id") String id, @RequestParam("fiction_id") long fiction_id, @RequestParam("fiction_pic_path") String fiction_pic_path, @RequestParam("type") String type, @RequestParam("del_status") boolean del_status) {
 
         if (type.equals("fiction")&&!del_status) {//小说作者和admin的id不同
-            mongoTemplate.updateFirst(new Query(Criteria.where("id").is(new ObjectId(id))), Update.update("status", Constant.FictionStatusDeatilError).set("fiction_pic_path", "").set("fiction_status", 0), FictionBean.class);
+            mongoTemplate.updateFirst(new Query(Criteria.where("id").is(new ObjectId(id))), Update.update("status", Constant.FictionStatusDeatilError).set("fiction_pic_path", "default.png").set("fiction_status", 0), FictionBean.class);
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(fiction_id)), FictionDetailBean.class);//删除小说内容
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(fiction_id)), FictionActorBean.class);//删除小说角色
            // mongoTemplate.remove(new Query(Criteria.where("pic_name").is(fiction_pic_path)), PicBean.class);//删除小说图片
         } else if (type.equals("pic")) {
-            mongoTemplate.updateFirst(new Query(Criteria.where("id").is(new ObjectId(id))), Update.update("status", Constant.FictionStatusPicError).set("fiction_pic_path", "").set("fiction_status", 0), FictionBean.class);
+            mongoTemplate.updateFirst(new Query(Criteria.where("id").is(new ObjectId(id))), Update.update("status", Constant.FictionStatusPicError).set("fiction_pic_path", "default.png").set("fiction_status", 0), FictionBean.class);
            // mongoTemplate.remove(new Query(Criteria.where("pic_name").is(fiction_pic_path)), PicBean.class);//删除小说图片
         }else if(type.equals("fiction")&&del_status){//小说作者和admin的id相同
             mongoTemplate.remove(new Query(Criteria.where("id").is(new ObjectId(id))),FictionBean.class);

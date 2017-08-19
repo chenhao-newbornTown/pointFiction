@@ -1,18 +1,16 @@
 package com.point.controller;
 
 import com.google.gson.Gson;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.point.constant.Constant;
 import com.point.entity.*;
 import com.point.service.FictionService;
 import com.point.service.UserFictionService;
 import com.point.service.UserService;
 import com.point.util.PublicUtil;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,6 +64,7 @@ public class UserFictionController extends BaseController {
             return returnJsonData(Constant.DataError, "", Constant.FictionIdsError);
         }
 
+        String uid = request.getParameter("uid");
 
         // LinkedHashMap<String, Object> jsonMap = new LinkedHashMap<String, Object>();
 
@@ -81,14 +80,20 @@ public class UserFictionController extends BaseController {
 
             // jsonMap.put(fiction_id,fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id));
 
-            fictionBeanList.add(fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id));
+            FictionBean fictionBean = fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id);
+
+            if(!StringUtils.isEmpty(uid)){
+                fictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid,fiction_id));
+            }
+
+            fictionBeanList.add(fictionBean);
         }
 
         return returnJsonData(Constant.DataDefault, fictionBeanList, "");
     }
 
     /**
-     * 返回当天,用户没有看过的小说的fictionList
+     * 返回当天,小说的fictionList,并获取
      *
      * @param request
      * @return
@@ -99,11 +104,28 @@ public class UserFictionController extends BaseController {
 
         String uid = request.getParameter("uid");
 
-        List<Long> userReadFictionSet = null;
+//        List<Long> userReadFictionSet = null;
 
         List<Long> allFictionSet = fictionService.getAllFictionIdListFromReidsByKey("fiction_idlist_all");
 
-        List<Long> userUnread = new ArrayList<Long>();//用户未读小说的fictionSet
+        Map<String, Object> JsonMap = new HashMap<String, Object>();
+
+
+        if (StringUtils.isNotEmpty(uid)) {
+            Map<String, Object> userReadMap = userFictionService.getUserLastestFictionInfo(uid);
+
+            if (null != userReadMap) {
+                JsonMap.put("user_latest_read", userReadMap);
+
+                allFictionSet.remove(Long.parseLong(userReadMap.get("fiction_id").toString()));
+            }
+        }
+
+        JsonMap.put("fiction_list", allFictionSet);
+
+        return returnJsonData(Constant.DataDefault, JsonMap, "");
+
+       /* List<Long> userUnread = new ArrayList<Long>();//用户未读小说的fictionSet
 
         if (StringUtils.isEmpty(uid)) {//用户未注册，则传回所有的fictionlist
 
@@ -121,7 +143,7 @@ public class UserFictionController extends BaseController {
             userUnread.removeAll(userReadFictionSet);
         }
 
-        return returnJsonData(Constant.DataDefault, userUnread, "");
+        return returnJsonData(Constant.DataDefault, userUnread, "");*/
     }
 
     /**
@@ -159,10 +181,29 @@ public class UserFictionController extends BaseController {
     }
 
     /**
+     * 用户退出小说前的阅读记录和阅读位置
+     *
+     * @param request
+     */
+
+    @RequestMapping("/updateuserreadline")
+    public String getUserLatestFictionInfo(HttpServletRequest request) {
+
+        String fiction_id = request.getParameter("fiction_id");
+        String uid = request.getParameter("uid");
+        Long user_read_line = Long.parseLong(request.getParameter("user_read_line"));
+
+        userFictionService.updateUserLatestFictionInfo(fiction_id, uid, user_read_line);
+
+        return returnJsonData(Constant.DataDefault,"","");
+    }
+
+    /**
      * 小说阅读数+1
      */
     @RequestMapping("/increadcount")
-    public void incFictionUserReadCount(HttpServletRequest request) {
+    @ResponseBody
+    public String incFictionUserReadCount(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
 
@@ -176,8 +217,13 @@ public class UserFictionController extends BaseController {
             userFictionBean.setFiction_id(Long.parseLong(fiction_id));
             userFictionBean.setFiction_name(fictionService.getFictionInfoByFictionidFromRedis("fiction_info_all", fiction_id).getFiction_name());
             userFictionBean.setUser_read_timestamp(request.getAttribute("timestamp").toString());
+            userFictionBean.setUser_read_line(0L);
+            userFictionBean.setUser_like_count("0");
             userFictionService.insertUserFictionToMongo(userFictionBean);
         }
+
+        return returnJsonData(Constant.DataDefault,"","");
+
     }
 
 
@@ -200,7 +246,7 @@ public class UserFictionController extends BaseController {
 
         List<UserFictionBean> userFictionBeanList = userFictionService.getUserFictionList(uid);
 
-        if(null ==userFictionBeanList||userFictionBeanList.size()<=0){
+        if (null == userFictionBeanList || userFictionBeanList.size() <= 0) {
             return returnJsonData(Constant.DataDefault, "", "");
         }
 
@@ -223,7 +269,9 @@ public class UserFictionController extends BaseController {
                     userReadFictionBean.setFiction_pic_path(fictionBean.getFiction_pic_path());
 //                    userReadFictionBean.setRead_count(fictionBean.getRead_count());
 //                    userReadFictionBean.setLike_count(fictionBean.getLike_count());
-
+                    userReadFictionBean.setFiction_line_num(fictionBean.getFiction_line_num());
+                    userReadFictionBean.setUser_read_line(userFictionService.getuserLatestFictionLine(uid,fictionBean.getFiction_id()));
+                    userReadFictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid,String.valueOf(fictionBean.getFiction_id())));
                     userReadFictionBeanArrayList.add(userReadFictionBean);
                 }
             }
@@ -232,9 +280,14 @@ public class UserFictionController extends BaseController {
     }
 
 
+    /**
+     * 获取用户写了几本小说
+     * @param request
+     * @return
+     */
     @RequestMapping("/getmyfictioncount")
     @ResponseBody
-    public String getMyFictionCount(HttpServletRequest request){
+    public String getMyFictionCount(HttpServletRequest request) {
 
         String uid = request.getParameter("uid");
 
@@ -244,10 +297,9 @@ public class UserFictionController extends BaseController {
 
         long myFictionCount = userFictionService.getMyFictionCount(uid);
 
-        return  returnJsonData(Constant.DataDefault,myFictionCount,"");
+        return returnJsonData(Constant.DataDefault, myFictionCount, "");
 
     }
-
 
 
     /**
@@ -271,9 +323,22 @@ public class UserFictionController extends BaseController {
 
         int page_num = Integer.parseInt(request.getParameter("page_num"));
 
-        List<FictionBean> fictionBeanList = userFictionService.getMyFictionByUidLimit(uid,page_num);//getMyFictionByUid(uid);
+        List<FictionBean> fictionBeanList = userFictionService.getMyFictionByUidLimit(uid, page_num);//getMyFictionByUid(uid);
 
-        return returnJsonData(Constant.DataDefault, fictionBeanList, "");
+        List<FictionInfoActorsBean> fictionInfoActorsBeanList = new ArrayList<FictionInfoActorsBean>();
+
+        for (FictionBean fictionBean : fictionBeanList) {
+
+            FictionInfoActorsBean fictionInfoActorsBean = new FictionInfoActorsBean();
+
+            fictionInfoActorsBean.setFictionBean(fictionBean);
+            fictionInfoActorsBean.setFiction_actors(userFictionService.getFictionActorListByFictionid(fictionBean.getFiction_id()));
+
+
+            fictionInfoActorsBeanList.add(fictionInfoActorsBean);
+        }
+
+        return returnJsonData(Constant.DataDefault, fictionInfoActorsBeanList, "");
     }
 
 
@@ -303,7 +368,7 @@ public class UserFictionController extends BaseController {
         map.put("fiction_page_num", start_fiction_page_num);
         map.put("fiction_detail", fictionDetailBeanList);
 
-        return returnJsonData(Constant.DataDefault,map,"");
+        return returnJsonData(Constant.DataDefault, map, "");
     }
 
 
@@ -324,12 +389,12 @@ public class UserFictionController extends BaseController {
 
         long page_num = 20;
 
-        long start_fiction_detail_num = (fiction_page_num-1) * page_num;
+        long start_fiction_detail_num = (fiction_page_num - 1) * page_num;
         long end_fiction_detail_num = start_fiction_detail_num + page_num;
 
         List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionPreviousDetailFromMongo(fiction_id, start_fiction_detail_num, end_fiction_detail_num);
 
-        return returnJsonData(Constant.DataDefault,fictionDetailBeanList,"");
+        return returnJsonData(Constant.DataDefault, fictionDetailBeanList, "");
 
     }
 
@@ -345,6 +410,10 @@ public class UserFictionController extends BaseController {
 
         String uid = request.getParameter("uid");
 
+        if (StringUtils.isEmpty(uid)) {
+            return returnJsonData(Constant.DataError, "", Constant.FictionUidError);
+        }
+
         String fiction_name = request.getParameter("fiction_name");
         String fiction_pic_path = request.getParameter("fiction_pic_path");
 
@@ -355,17 +424,19 @@ public class UserFictionController extends BaseController {
         fictionBean.setFiction_author_id(uid);
         fictionBean.setFiction_author_name(userService.getNickNameByUid(uid));
         fictionBean.setUpdate_time(update_time);
-        fictionBean.setUpdate_date(new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").format(new Date()));
+        fictionBean.setUpdate_date(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         fictionBean.setFiction_pic_path(fiction_pic_path);
         fictionBean.setFiction_line_num(0);
         fictionBean.setFiction_status(0);
+        fictionBean.setStatus(Constant.FictionStatusDefault);
+        fictionBean.setUser_like_count_status("0");
 
         FictionBean fictionMongoBean = fictionService.saveFiction(fictionBean);
 
-        if(null !=fictionMongoBean){
-            return  returnJsonData(Constant.DataDefault,fictionMongoBean,Constant.AddFictionSuccessed);
-        }else {
-            return returnJsonData(Constant.DataError,"",Constant.AddFictionFailed);
+        if (null != fictionMongoBean) {
+            return returnJsonData(Constant.DataDefault, fictionMongoBean, Constant.AddFictionSuccessed);
+        } else {
+            return returnJsonData(Constant.DataError, "", Constant.AddFictionFailed);
         }
     }
 
@@ -521,12 +592,12 @@ public class UserFictionController extends BaseController {
 
         if (userFictionService.actordetailisExists(fiction_id, actor_id)) {
             boolean addStatus = userFictionService.delActorintoFictionInfo(fiction_id, actor_id);
-            if(addStatus){
+            if (addStatus) {
                 return returnJsonData(Constant.DataDefault, "", Constant.delActorSuccessed);
             } else {
-            return returnJsonData(Constant.DataError, "", Constant.delActorFailed);
+                return returnJsonData(Constant.DataError, "", Constant.delActorFailed);
             }
-        }else {
+        } else {
             return returnJsonData(Constant.DataError, "", Constant.DelAcrotNameError);
         }
     }
@@ -576,15 +647,52 @@ public class UserFictionController extends BaseController {
 
         String timestamp = request.getAttribute("timestamp").toString();
 
+        String fiction_status = request.getParameter("fiction_status");
+
         boolean fictionDetailStatus = userFictionService.releaseFictionDetail(fiction_id);
         boolean fictionStatus = fictionService.releaseFiction(fiction_id, timestamp);
 
-        if(fictionDetailStatus && fictionStatus){
-            return returnJsonData(Constant.DataDefault,"",Constant.ReleaseFictionSuccessed);
-        }else {
-            return returnJsonData(Constant.DataError,"",Constant.ReleaseFictionFailed);
+        if (fictionDetailStatus && fictionStatus) {
+
+            if(fiction_status.equals("2")){
+                String key = "fiction_info_deatil_" + fiction_id;
+
+                fictionService.deleteRedisBykey(key);
+
+                fictionService.insertFictionDetailToRedis(Long.parseLong(fiction_id), 20, key);
+            }
+            return returnJsonData(Constant.DataDefault, "", Constant.ReleaseFictionSuccessed);
+        } else {
+            return returnJsonData(Constant.DataError, "", Constant.ReleaseFictionFailed);
         }
 
     }
 
+
+    /**
+     * 用户对已经加入热门池的小说，进行小说语句的update,del，则更新redis中的数据
+     * fiction_status的状态必须是2(加入热门池)，才能调用此接口
+     *
+     * @param request
+     */
+    @RequestMapping("/updateredisfictiondetail")
+    public String updateFictionDetail(HttpServletRequest request) {
+
+        String fiction_id = request.getParameter("fiction_id");
+
+        String key = "fiction_info_deatil_";
+
+        try{
+            fictionService.deleteRedisBykey(key);
+
+            fictionService.insertFictionDetailToRedis(Long.parseLong(fiction_id), 20, key);
+
+            return returnJsonData(Constant.DataDefault,"","");
+        }catch (Exception e){
+            return returnJsonData(Constant.DataError,"","");
+        }
+
+
+
+    }
 }

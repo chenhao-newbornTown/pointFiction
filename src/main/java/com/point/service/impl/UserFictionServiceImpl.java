@@ -21,7 +21,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hadoop on 2017-7-18.
@@ -70,7 +72,7 @@ public class UserFictionServiceImpl implements UserFictionService {
 
         try {
             mongoTemplate.upsert(new Query(Criteria.where("uid").is(userFictionBean.getUid()).and("fiction_id").is(userFictionBean.getFiction_id()).and("fiction_name").is(userFictionBean.getFiction_name())),
-                    Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()), userFictionBean.getClass());
+                    Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()).set("user_read_line",userFictionBean.getUser_read_line()).set("user_like_count",userFictionBean.getUser_like_count()), userFictionBean.getClass());
 
             //  String key = "user_read_list_" + userFictionBean.getUid();
             // userFictionRedis.removeUserFictionByUid(key);
@@ -154,9 +156,9 @@ public class UserFictionServiceImpl implements UserFictionService {
     }
 
 
-    public List<FictionBean> getMyFictionByUidLimit(String uid,int page_num) {
+    public List<FictionBean> getMyFictionByUidLimit(String uid, int page_num) {
 
-        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_author_id").is(uid)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))).limit(20).skip(20*(page_num-1)), FictionBean.class);
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_author_id").is(uid)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))).limit(20).skip(20 * (page_num - 1)), FictionBean.class);
 
         return fictionBeanList;
     }
@@ -310,13 +312,64 @@ public class UserFictionServiceImpl implements UserFictionService {
 
     }
 
-    public long getMyFictionCount(String uid){
+    public long getMyFictionCount(String uid) {
 
-        long myFictionCount = mongoTemplate.count(new Query(Criteria.where("fiction_author_id").is(uid)),FictionBean.class);
+        long myFictionCount = mongoTemplate.count(new Query(Criteria.where("fiction_author_id").is(uid)), FictionBean.class);
 
         return myFictionCount;
 
     }
+
+    public Map<String, Object> getUserLastestFictionInfo(String uid) {
+
+        Map<String, Object> map = null;
+
+        List<UserFictionBean> userFictionBeanList = mongoTemplate.find(new Query(Criteria.where("uid").is(Long.parseLong(uid))).with(new Sort(new Sort.Order(Sort.Direction.DESC, "user_read_timestamp"))), UserFictionBean.class);
+
+        if (null == userFictionBeanList || userFictionBeanList.size()<=0) {
+            return map;
+        } else {
+            map = new HashMap<String, Object>();
+            map.put("fiction_id", userFictionBeanList.get(0).getFiction_id());
+            map.put("user_read_line", userFictionBeanList.get(0).getUser_read_line());
+
+            return map;
+        }
+    }
+
+    public void updateUserLatestFictionInfo(String fiction_id, String uid, long user_read_line) {
+
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("uid").is(Long.parseLong(uid))),Update.update("user_read_line",user_read_line),UserFictionBean.class);
+    }
+
+    public long getuserLatestFictionLine(String uid,long fiction_id){
+
+        UserFictionBean userFictionBean = mongoTemplate.find(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(fiction_id)), UserFictionBean.class).get(0);
+
+        if(null == userFictionBean){
+            return 0L;
+        }else {
+            return userFictionBean.getUser_read_line();
+        }
+
+    }
+
+    public List<FictionActorBean> getFictionActorListByFictionid(long fiction_id){
+
+        List<FictionActorBean> fictionActorBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(fiction_id)),FictionActorBean.class);
+
+
+        if(null !=fictionActorBeanList && fictionActorBeanList.size()>0){
+
+            return fictionActorBeanList;
+
+        }else {
+            return null;
+        }
+
+
+    }
+
 
 
 }

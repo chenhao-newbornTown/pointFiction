@@ -19,10 +19,14 @@ public interface UserService {
 
     void insertUserTokenToReids(String token ,String uid_str,long time);
 
+    void insertUserTokenMapsToReids(String uid_str,String now_token,String old_token,long time);
+
     UserInfoBean getUserInfobyToken(String token,String md5token);
 
     boolean updateUserInfoToMongo(String uid, String timestamp,String mobile_device_num,boolean status);
 
     String getNickNameByUid(String uid);
+
+    String getUserTokenMapsFromReids(String key,String token_type);
 
 }

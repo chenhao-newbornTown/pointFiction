@@ -20,6 +20,26 @@ public class UserFictionBean {
 
     private String user_read_timestamp;
 
+    private String user_like_count;
+
+    private long user_read_line;//用户读到第多少行
+
+    public String getUser_like_count() {
+        return user_like_count;
+    }
+
+    public void setUser_like_count(String user_like_count) {
+        this.user_like_count = user_like_count;
+    }
+
+    public long getUser_read_line() {
+        return user_read_line;
+    }
+
+    public void setUser_read_line(long user_read_line) {
+        this.user_read_line = user_read_line;
+    }
+
     public String getId() {
         return id;
     }

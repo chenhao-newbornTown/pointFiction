@@ -6,6 +6,7 @@ import com.point.entity.FictionDetailBean;
 import com.point.entity.UserFictionBean;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hadoop on 2017-7-18.
@@ -59,6 +60,14 @@ public interface UserFictionService {
     long getMyFictionCount(String uid);
 
     List<FictionBean> getMyFictionByUidLimit(String uid, int page_num);
+
+    Map<String, Object> getUserLastestFictionInfo(String uid);
+
+    void updateUserLatestFictionInfo(String fiction_id, String uid, long user_read_line);
+
+    long getuserLatestFictionLine(String uid,long fiction_id);
+
+    List<FictionActorBean> getFictionActorListByFictionid(long fiction_id);
 
 
 }

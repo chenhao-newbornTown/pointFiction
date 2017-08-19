@@ -134,12 +134,22 @@ public class FictionController extends BaseController {
      * @param request
      */
     @RequestMapping("inclikecount")
-    public void incLikeCountByFictionid(HttpServletRequest request) {
+    @ResponseBody
+    public String incLikeCountByFictionid(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
+        String uid = request.getParameter("uid");
 
-        fictionService.updateFictionUserLikeCount(fiction_id);
+        try{
+            fictionService.updateFictionUserLikeCount(fiction_id);
 
+            fictionService.insertUserLikeCount(uid,fiction_id);
+
+            return  returnJsonData(Constant.DataDefault,"",Constant.IncLikeCountSuccessed);
+
+        }catch (Exception e){
+            return  returnJsonData(Constant.DataError,"",Constant.IncLikeCountFailed);
+        }
     }
 
 
@@ -178,6 +188,10 @@ public class FictionController extends BaseController {
         return returnJsonData(Constant.DataDefault,picList,"");
     }
 
+    /**
+     * 拉取小说内容的敏感词
+     * @return
+     */
     @RequestMapping("/getmongosensitivewords")
     @ResponseBody
     public String getMongoSensitiveWords(){

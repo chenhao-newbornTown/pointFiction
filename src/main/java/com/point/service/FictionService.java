@@ -73,4 +73,10 @@ public interface FictionService {
 
     List<String> getMongoSensitiveWordsFromRedis(String key);
 
+    void insertFictionDetailToRedis(Long fiction_id,int fiction_page_num,String key);
+
+    void insertUserLikeCount(String uid,String fiction_id);
+
+    String getUserLikeCountStatus(String uid,String fiction_id);
+
 }

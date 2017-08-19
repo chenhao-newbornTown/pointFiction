@@ -165,5 +165,15 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    public void insertUserTokenMapsToReids(String uid_str,String now_token,String old_token,long time){
+
+        userRedis.insertUserTokenMapsToReids(uid_str, now_token, old_token, time);
+    }
+
+    public String getUserTokenMapsFromReids(String key,String token_type){
+
+        return userRedis.getUserTokenMapsFromReids(key,token_type);
+    }
+
 
 }

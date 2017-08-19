@@ -36,8 +36,18 @@ public class FictionBean {
 
     private String status;//小说状态--->图片被删，小说被删，默认00000
 
+    private String user_like_count_status;//0,未点赞，1，已点赞
+
     public String getUpdate_date() {
         return update_date;
+    }
+
+    public String getUser_like_count_status() {
+        return user_like_count_status;
+    }
+
+    public void setUser_like_count_status(String user_like_count_status) {
+        this.user_like_count_status = user_like_count_status;
     }
 
     public void setUpdate_date(String update_date) {

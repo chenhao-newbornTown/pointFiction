@@ -51,7 +51,7 @@
     <div id="wrapper">
         <div id="content">
             <div id="header" style="height:80px">
-                <a href=""><img width=350px></a></div>
+                </div>
 
             <div id="darkbannerwrap">
             </div>

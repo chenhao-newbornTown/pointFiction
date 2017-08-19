@@ -3,6 +3,7 @@ package com.point.redis;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.point.entity.*;
+import com.point.util.PublicUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -174,6 +175,5 @@ public class FictionRedis extends BaseRedis {
         }
         return sensitiveWords;
     }
-
 
 }

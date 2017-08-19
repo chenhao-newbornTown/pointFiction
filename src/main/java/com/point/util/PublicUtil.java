@@ -190,7 +190,7 @@ public class PublicUtil {
 
         mongoTemplate.insert(fictionDetailBeanList, FictionDetailBean.class);
         mongoTemplate.insert(fictionActorBeanList, FictionActorBean.class);
-        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(fiction_id)), Update.update("fiction_name", fiction_name).set("fiction_author_name", fiction_author_name).set("update_time",String.valueOf(System.currentTimeMillis())).set("update_date",new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").format(new Date())), FictionBean.class);
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(fiction_id)), Update.update("fiction_name", fiction_name).set("fiction_author_name", fiction_author_name).set("update_time",String.valueOf(System.currentTimeMillis())).set("update_date",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
 
         if (tempFile.exists()) {
             tempFile.delete();
@@ -220,11 +220,12 @@ public class PublicUtil {
         fictionBean.setFiction_author_id("888888");
         fictionBean.setFiction_author_name(fiction_author_name);
         fictionBean.setUpdate_time(String.valueOf(System.currentTimeMillis()));
-        fictionBean.setUpdate_date(new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").format(new Date()));
+        fictionBean.setUpdate_date(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         fictionBean.setFiction_pic_path(fiction_pic_path);
         fictionBean.setFiction_status(1);
         fictionBean.setFiction_line_num((long) sheet.getLastRowNum());
         fictionBean.setStatus(Constant.FictionStatusDefault);
+        fictionBean.setUser_like_count_status("0");
 
         FictionBean fictionMongoBean = fictionRepository.save(fictionBean);
 

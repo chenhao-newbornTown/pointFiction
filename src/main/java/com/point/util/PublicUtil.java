@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by hadoop on 2017-7-20.
@@ -73,6 +74,28 @@ public class PublicUtil {
             ex.printStackTrace();
         }
         return resultString;
+    }
+
+    /**
+     * 将字符串前后加上随机数（5以内）个空格（用于AES加密）
+     *
+     * @param str
+     * @return String
+     */
+    public static String getAddSpaceStr(String str) {
+
+        Random random = new Random();
+        int i = random.nextInt(5) + 1;
+        int j = random.nextInt(5) + 1;
+        StringBuffer FrontTemp = new StringBuffer("");
+        StringBuffer TailTemp = new StringBuffer("");
+        for (int t = 0; t < i; t++) {
+            FrontTemp.append(" ");
+        }
+        for (int t1 = 0; t1 < j; t1++) {
+            TailTemp.append(" ");
+        }
+        return FrontTemp.toString() + str + TailTemp.toString();
     }
 
     /**

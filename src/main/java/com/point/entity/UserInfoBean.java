@@ -39,16 +39,8 @@ public class UserInfoBean {
     private String mobile_device_num;//手机设备号
 
 
-    private String token_device;//token和手机设备号的字符串，1，判断用户是否是在一个设备上登录的，2，判断单点登录
+    //private String token_device;//token和手机设备号的字符串，1，判断用户是否是在一个设备上登录的，2，判断单点登录
 
-
-    public String getToken_device() {
-        return token_device;
-    }
-
-    public void setToken_device(String token_device) {
-        this.token_device = token_device;
-    }
 
     public String getNick_name() {
         return nick_name;
@@ -134,7 +126,6 @@ public class UserInfoBean {
                 ", registered_timestamp='" + registered_timestamp + '\'' +
                 ", token='" + token + '\'' +
                 ", mobile_device_num='" + mobile_device_num + '\'' +
-                ", token_device='" + token_device + '\'' +
                 '}';
     }
 }

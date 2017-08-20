@@ -555,7 +555,7 @@ public class UserFictionController extends BaseController {
         String fiction_id = request.getParameter("fiction_id");
         String actor_name = request.getParameter("actor_name");
 
-        String fiction_actor_id = PublicUtil.makeMD5(actor_name);
+        String fiction_actor_id = PublicUtil.makeMD5(actor_name+System.currentTimeMillis());
 
         FictionActorBean fictionActorBean = new FictionActorBean();
         fictionActorBean.setFiction_id(Long.parseLong(fiction_id));

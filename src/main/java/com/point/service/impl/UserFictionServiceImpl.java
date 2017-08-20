@@ -249,7 +249,7 @@ public class UserFictionServiceImpl implements UserFictionService {
 
             //mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))),new Update().pull("fiction_actors", actor_name),FictionBean.class);
 
-            mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_id").is(actor_id)), FictionActorBean.class);
+            mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_actor_id").is(actor_id)), FictionActorBean.class);
 
             return true;
         } catch (Exception e) {

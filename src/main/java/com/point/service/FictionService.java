@@ -16,25 +16,24 @@ public interface FictionService {
 
     /**
      * key ficitonlist_yyyyMMdd
+     *
      * @param key
      * @return
      */
     boolean redisFictionListExists(String key);
 
     /**
-     *
      * @param key
      * @param page_fiction_num 每页多少个小说
      */
-    void insertFictionListToRedis(String key,String page_fiction_num,List<Long> fiction_id_List);
+    void insertFictionListToRedis(String key, String page_fiction_num, List<Long> fiction_id_List);
 
     /**
-     *
      * @param key
      * @param pagenum 取第几页的小说
      * @return
      */
-    List<FictionBean> getFictionListFromReidsByKey(String key,String pagenum);
+    List<FictionBean> getFictionListFromReidsByKey(String key, String pagenum);
 
     List<FictionBean> getFictionListFromMongoByKey(String updatetime);
 
@@ -46,16 +45,17 @@ public interface FictionService {
     void deleteRedisBykey(String key);
 
     void updateFictionUserReadCount(String fiction_id);
+
     void updateFictionUserLikeCount(String fiction_id);
 
-    FictionBean getFictionInfoByFictionidFromRedis(String key,String fiction_id);
+    FictionBean getFictionInfoByFictionidFromRedis(String key, String fiction_id);
 
-    long getReadAndLikeCountByFictionidFromMongo(String fiction_id,String readOrLike);
+    long getReadAndLikeCountByFictionidFromMongo(String fiction_id, String readOrLike);
 
 
     FictionBean saveFiction(FictionBean fictionBean);
 
-    boolean releaseFiction(String fiction_id,String timestamp);
+    boolean releaseFiction(String fiction_id, String timestamp);
 
     String getFictionPicPathByid(long fiction_id);
 
@@ -73,10 +73,14 @@ public interface FictionService {
 
     List<String> getMongoSensitiveWordsFromRedis(String key);
 
-    void insertFictionDetailToRedis(Long fiction_id,int fiction_page_num,String key);
+    void insertFictionDetailToRedis(Long fiction_id, int fiction_page_num, String key);
 
-    void insertUserLikeCount(String uid,String fiction_id);
+    void insertUserLikeCount(String uid, String fiction_id);
 
-    String getUserLikeCountStatus(String uid,String fiction_id);
+    String getUserLikeCountStatus(String uid, String fiction_id);
+
+    void updateAllFictionIdListToRedis(String key);
+
+    boolean getFictionStatus(String fiction_id);
 
 }

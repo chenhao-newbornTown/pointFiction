@@ -21,27 +21,27 @@ import javax.crypto.spec.SecretKeySpec;
 public class EncryptionUtils {
 
 
-
     /**
      * AES算法加密
-     * @param content 需要加密的内容
-     * @param password  加密密码 （长度要是8的倍数）
+     *
+     * @param content  需要加密的内容
+     * @param password 加密密码 （长度要是8的倍数）
      * @return
      */
-    public static byte[] aesCrypto(String content, String password,boolean isRandom) {
+    public static byte[] aesCrypto(String content, String password, boolean isRandom) {
         try {
 
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");		//此处linux与windows不同， 需要注意！！！
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");        //此处linux与windows不同， 需要注意！！！
             random.setSeed(password.getBytes());
 
             KeyGenerator kgen = KeyGenerator.getInstance("AES");
-            kgen.init(128,random);
+            kgen.init(128, random);
             SecretKey secretKey = kgen.generateKey();
             byte[] enCodeFormat = secretKey.getEncoded();
             SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");
             Cipher cipher = Cipher.getInstance("AES");// 创建密码器
 
-            if(isRandom){
+            if (isRandom) {
                 //修改原str 防止加密后重复问题
                 content = PublicUtil.getAddSpaceStr(content);
             }
@@ -67,7 +67,9 @@ public class EncryptionUtils {
     }
 
 
-    /**AES算法解密
+    /**
+     * AES算法解密
+     *
      * @param content  待解密内容
      * @param password 解密密钥 （长度要是8的倍数）
      * @return
@@ -80,7 +82,7 @@ public class EncryptionUtils {
             random.setSeed(password.getBytes());
 
             KeyGenerator kgen = KeyGenerator.getInstance("AES");
-            kgen.init(128,random);
+            kgen.init(128, random);
 
             SecretKey secretKey = kgen.generateKey();
             byte[] enCodeFormat = secretKey.getEncoded();
@@ -104,8 +106,9 @@ public class EncryptionUtils {
     }
 
 
-
-    /**将二进制转换成16进制
+    /**
+     * 将二进制转换成16进制
+     *
      * @param buf
      * @return
      */
@@ -121,17 +124,19 @@ public class EncryptionUtils {
         return sb.toString();
     }
 
-    /**将16进制转换为二进制
+    /**
+     * 将16进制转换为二进制
+     *
      * @param hexStr
      * @return
      */
     public static byte[] parseHexStr2Byte(String hexStr) {
         if (hexStr.length() < 1)
             return null;
-        byte[] result = new byte[hexStr.length()/2];
-        for (int i = 0;i< hexStr.length()/2; i++) {
-            int high = Integer.parseInt(hexStr.substring(i*2, i*2+1), 16);
-            int low = Integer.parseInt(hexStr.substring(i*2+1, i*2+2), 16);
+        byte[] result = new byte[hexStr.length() / 2];
+        for (int i = 0; i < hexStr.length() / 2; i++) {
+            int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
+            int low = Integer.parseInt(hexStr.substring(i * 2 + 1, i * 2 + 2), 16);
             result[i] = (byte) (high * 16 + low);
         }
         return result;
@@ -139,12 +144,13 @@ public class EncryptionUtils {
 
     /**
      * 加密
+     *
      * @param temp
-     * @param isRandom  true：随机加密   false：固定加密
+     * @param isRandom true：随机加密   false：固定加密
      * @return
      */
-    public static String encrypt(String temp,boolean isRandom){
-        byte[] encryptResult = aesCrypto(temp, Constant.EncryptKey,isRandom);
+    public static String encrypt(String temp, boolean isRandom) {
+        byte[] encryptResult = aesCrypto(temp, Constant.EncryptKey, isRandom);
         String encryptResultStr = parseByte2HexStr(encryptResult);
         return encryptResultStr;
     }
@@ -152,33 +158,37 @@ public class EncryptionUtils {
 
     /**
      * 解密
+     *
      * @return
      */
-    public static String decrypt(String temp){
-        byte[] decryptFrom = parseHexStr2Byte(temp);
-        byte[] decryptResult = aesDecrypt(decryptFrom,Constant.EncryptKey);
-        return new String(decryptResult).trim();
+    public static String decrypt(String temp) {
+        try {
+            byte[] decryptFrom = parseHexStr2Byte(temp);
+            byte[] decryptResult = aesDecrypt(decryptFrom, Constant.EncryptKey);
+            return new String(decryptResult).trim();
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
-    /*public static void main(String[] args) {
-
-        String a = "789456123|ASCsD-QWE-78941236";
-
-        String b = encrypt(a,true);
-        String c = encrypt(a,false);
-
-
-        String d = decrypt(b);
-        String e = decrypt(c);
-
-        System.out.println(a);
-        System.out.println(b);
-        System.out.println(c);
-        System.out.println(d);
-        System.out.println(e);
-
-
-
-
-    }*/
+//    public static void main(String[] args) {
+//
+//        String a = "36F17C3939AC3E7B2FC9396FA8E953EA|asdasdas-eweqwe123";
+//
+//        //       String b = encrypt(a,true);
+////        String c = encrypt(a,false);
+////
+////
+//        String d = decrypt(a);
+////        String e = decrypt(c);
+////
+////        System.out.println(a);
+////        System.out.println(b);
+////        System.out.println(c);
+//        System.out.println(d);
+////        System.out.println(e);
+//
+//
+//    }
 }

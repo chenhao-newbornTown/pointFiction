@@ -52,5 +52,6 @@ public class Constant {
     public static final String FictionStatusPicError = "100001";//小说图片违规被删
     public static final String FictionStatusDeatilError = "100002";//小说内容违规被删
     public static final String UserReadLineError = "100003";//小说阅读行数为空
+    public static final String UserLoginFailed = "300001";     // 账号已在其他地方登录
 
 }

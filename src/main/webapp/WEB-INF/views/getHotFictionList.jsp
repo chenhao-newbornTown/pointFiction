@@ -129,7 +129,7 @@
     <form name="logForm" method="post" action="/searchhotfictionlist">
 
         <display:table name="fictionBeanList" cellspacing="0" cellpadding="0" style="width:100%"
-                       requestURI="" id="fb" pagesize="50"
+                       requestURI="" id="fb" pagesize="10"
                        class="list reportsList">
 
             <display:column style="width:5%" title="更新时间" >

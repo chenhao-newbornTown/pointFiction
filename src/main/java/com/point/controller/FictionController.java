@@ -56,59 +56,56 @@ public class FictionController extends BaseController {
      *
      * @return
      * @throws Exception
-     */
-    @RequestMapping("/getfictionlist")
-    @ResponseBody
-    public String getFictionList() throws Exception {
 
-        List<Long> fiction_daily_Set = null;
+     *  @RequestMapping("/getfictionlist")
+     *   @ResponseBody public String getFictionList() throws Exception {
 
-        String all_key = "fiction_idlist_all";
+    List<Long> fiction_daily_Set = null;
 
-        if (fictionService.redisFictionListExists(all_key)) {//查询redis中是否存在所有小说的set集合
-            fiction_daily_Set = fictionService.getAllFictionIdListFromReidsByKey(all_key);
-        } else {
-            fiction_daily_Set = fictionService.insertAllFictionIdListToRedis(all_key);
-        }
-        return gson.toJson(fiction_daily_Set);
+    String all_key = "fiction_idlist_all";
+
+    if (fictionService.redisFictionListExists(all_key)) {//查询redis中是否存在所有小说的set集合
+    fiction_daily_Set = fictionService.getAllFictionIdListFromReidsByKey(all_key);
+    } else {
+    fiction_daily_Set = fictionService.insertAllFictionIdListToRedis(all_key);
     }
-
+    return gson.toJson(fiction_daily_Set);
+    }
+     */
 
     /**
      * 根据fiction_id从redis中获取小说的作者，名称，图片连接
      *
      * @param request
      * @return
-     */
-    @RequestMapping("/getfictioninfo")
-    @ResponseBody
-    public String getFictionInfoByFictionid(HttpServletRequest request) {
 
-        String fiction_id = request.getParameter("fiction_id");
+     * @RequestMapping("/getfictioninfo")
+     * @ResponseBody public String getFictionInfoByFictionid(HttpServletRequest request) {
 
-        String key = "fiction_info_all";
+    String fiction_id = request.getParameter("fiction_id");
 
-        FictionBean fictionBean = fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id);
+    String key = "fiction_info_all";
 
-        return gson.toJson(fictionBean);
+    FictionBean fictionBean = fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id);
+
+    return gson.toJson(fictionBean);
     }
-
+     */
     /**
      * 获取小说的readcount
      * 未放入redis
      *
      * @param request
      * @return
-     */
-    @RequestMapping("/getreadcount")
-    public String getreadCountByFictionid(HttpServletRequest request) {
 
-        String fiction_id = request.getParameter("fiction_id");
+     * @RequestMapping("/getreadcount") public String getreadCountByFictionid(HttpServletRequest request) {
 
-        long read_count = fictionService.getReadAndLikeCountByFictionidFromMongo(fiction_id, "read_count");
+     String fiction_id = request.getParameter("fiction_id");
 
-        return String.valueOf(read_count);
-    }
+     long read_count = fictionService.getReadAndLikeCountByFictionidFromMongo(fiction_id, "read_count");
+
+     return String.valueOf(read_count);
+     }*/
 
     /**
      * 从redis中获取小说的likecount
@@ -140,15 +137,15 @@ public class FictionController extends BaseController {
         String fiction_id = request.getParameter("fiction_id");
         String uid = request.getParameter("uid");
 
-        try{
+        try {
             fictionService.updateFictionUserLikeCount(fiction_id);
 
-            fictionService.insertUserLikeCount(uid,fiction_id);
+            fictionService.insertUserLikeCount(uid, fiction_id);
 
-            return  returnJsonData(Constant.DataDefault,"",Constant.IncLikeCountSuccessed);
+            return returnJsonData(Constant.DataDefault, "", Constant.IncLikeCountSuccessed);
 
-        }catch (Exception e){
-            return  returnJsonData(Constant.DataError,"",Constant.IncLikeCountFailed);
+        } catch (Exception e) {
+            return returnJsonData(Constant.DataError, "", Constant.IncLikeCountFailed);
         }
     }
 
@@ -168,15 +165,16 @@ public class FictionController extends BaseController {
         //小说具体内容存储到redis
         fictionService.insertFictionListToRedis(key + "info_deatil_", "20", fiction_id_List);
 
-        fictionService.getMongoPicToRedis(key+"pics");
+        fictionService.getMongoPicToRedis(key + "pics");
 
-        fictionService.getMongoSensitiveWordsToRedis(key+"sensitivewords");
+        fictionService.getMongoSensitiveWordsToRedis(key + "sensitivewords");
 
 
     }
 
     /**
      * 拉取用户创建小说时待选的图片id
+     *
      * @return
      */
     @RequestMapping("/getpiclist")
@@ -185,19 +183,20 @@ public class FictionController extends BaseController {
 
         List<String> picList = fictionService.getPicListFromRedis("fiction_pics");
 
-        return returnJsonData(Constant.DataDefault,picList,"");
+        return returnJsonData(Constant.DataDefault, picList, "");
     }
 
     /**
      * 拉取小说内容的敏感词
+     *
      * @return
      */
     @RequestMapping("/getmongosensitivewords")
     @ResponseBody
-    public String getMongoSensitiveWords(){
+    public String getMongoSensitiveWords() {
         List<String> sensitiveWordsList = fictionService.getMongoSensitiveWordsFromRedis("fiction_sensitivewords");
 
-        return returnJsonData(Constant.DataDefault,sensitiveWordsList,"");
+        return returnJsonData(Constant.DataDefault, sensitiveWordsList, "");
     }
 
 

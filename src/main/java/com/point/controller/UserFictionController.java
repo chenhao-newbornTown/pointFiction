@@ -29,10 +29,6 @@ public class UserFictionController extends BaseController {
 
     protected static Logger logger = LoggerFactory.getLogger(UserFictionController.class);
 
-    String REDIS_KEY = "userfiction_";
-
-    Gson gson = new Gson();
-
     @Autowired
     UserFictionService userFictionService;
 
@@ -82,8 +78,8 @@ public class UserFictionController extends BaseController {
 
             FictionBean fictionBean = fictionService.getFictionInfoByFictionidFromRedis(key, fiction_id);
 
-            if(!StringUtils.isEmpty(uid)){
-                fictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid,fiction_id));
+            if (!StringUtils.isEmpty(uid)) {
+                fictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid, fiction_id));
             }
 
             fictionBeanList.add(fictionBean);
@@ -195,7 +191,7 @@ public class UserFictionController extends BaseController {
 
         userFictionService.updateUserLatestFictionInfo(fiction_id, uid, user_read_line);
 
-        return returnJsonData(Constant.DataDefault,"","");
+        return returnJsonData(Constant.DataDefault, "", "");
     }
 
     /**
@@ -222,7 +218,7 @@ public class UserFictionController extends BaseController {
             userFictionService.insertUserFictionToMongo(userFictionBean);
         }
 
-        return returnJsonData(Constant.DataDefault,"","");
+        return returnJsonData(Constant.DataDefault, "", "");
 
     }
 
@@ -270,8 +266,8 @@ public class UserFictionController extends BaseController {
 //                    userReadFictionBean.setRead_count(fictionBean.getRead_count());
 //                    userReadFictionBean.setLike_count(fictionBean.getLike_count());
                     userReadFictionBean.setFiction_line_num(fictionBean.getFiction_line_num());
-                    userReadFictionBean.setUser_read_line(userFictionService.getuserLatestFictionLine(uid,fictionBean.getFiction_id()));
-                    userReadFictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid,String.valueOf(fictionBean.getFiction_id())));
+                    userReadFictionBean.setUser_read_line(userFictionService.getuserLatestFictionLine(uid, fictionBean.getFiction_id()));
+                    userReadFictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid, String.valueOf(fictionBean.getFiction_id())));
                     userReadFictionBeanArrayList.add(userReadFictionBean);
                 }
             }
@@ -282,6 +278,7 @@ public class UserFictionController extends BaseController {
 
     /**
      * 获取用户写了几本小说
+     *
      * @param request
      * @return
      */
@@ -451,8 +448,17 @@ public class UserFictionController extends BaseController {
 
         String fiction_id = request.getParameter("fiction_id");
         String uid = request.getParameter("uid");
+        String fiction_status = request.getParameter("fiction_status");
+
         boolean delstatus = userFictionService.delMyFiction(fiction_id, uid);
         if (delstatus) {
+
+            if (fiction_status.equals("2")) {
+                fictionService.deleteRedisBykey("fiction_info_deatil_" + fiction_id);
+
+                fictionService.updateAllFictionIdListToRedis("fiction_idlist_all");
+            }
+
             return returnJsonData(Constant.DataDefault, "", Constant.DelFictionSuccessed);
         } else {
             return returnJsonData(Constant.DataError, "", Constant.DelFictionFailed);
@@ -555,7 +561,7 @@ public class UserFictionController extends BaseController {
         String fiction_id = request.getParameter("fiction_id");
         String actor_name = request.getParameter("actor_name");
 
-        String fiction_actor_id = PublicUtil.makeMD5(actor_name+System.currentTimeMillis());
+        String fiction_actor_id = PublicUtil.makeMD5(actor_name + System.currentTimeMillis());
 
         FictionActorBean fictionActorBean = new FictionActorBean();
         fictionActorBean.setFiction_id(Long.parseLong(fiction_id));
@@ -647,15 +653,16 @@ public class UserFictionController extends BaseController {
 
         String timestamp = request.getAttribute("timestamp").toString();
 
-        String fiction_status = request.getParameter("fiction_status");
+       // String fiction_status = request.getParameter("fiction_status");
 
         boolean fictionDetailStatus = userFictionService.releaseFictionDetail(fiction_id);
         boolean fictionStatus = fictionService.releaseFiction(fiction_id, timestamp);
 
         if (fictionDetailStatus && fictionStatus) {
 
-            if(fiction_status.equals("2")){
-                String key = "fiction_info_deatil_" + fiction_id;
+//            if (fiction_status.equals("2")) {
+            if (fictionService.getFictionStatus(fiction_id)) {
+                String key = "fiction_info_deatil_";
 
                 fictionService.deleteRedisBykey(key);
 
@@ -680,19 +687,19 @@ public class UserFictionController extends BaseController {
 
         String fiction_id = request.getParameter("fiction_id");
 
-        String key = "fiction_info_deatil_";
+        if (fictionService.getFictionStatus(fiction_id)) {
+            String key = "fiction_info_deatil_";
+            try {
+                fictionService.deleteRedisBykey(key);
 
-        try{
-            fictionService.deleteRedisBykey(key);
+                fictionService.insertFictionDetailToRedis(Long.parseLong(fiction_id), 20, key);
 
-            fictionService.insertFictionDetailToRedis(Long.parseLong(fiction_id), 20, key);
-
-            return returnJsonData(Constant.DataDefault,"","");
-        }catch (Exception e){
-            return returnJsonData(Constant.DataError,"","");
+                return returnJsonData(Constant.DataDefault, "", "");
+            } catch (Exception e) {
+                return returnJsonData(Constant.DataError, "", "");
+            }
         }
-
-
-
+        return returnJsonData(Constant.DataDefault, "", "");
     }
+
 }

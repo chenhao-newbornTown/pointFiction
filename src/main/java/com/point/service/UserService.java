@@ -29,4 +29,6 @@ public interface UserService {
 
     String getUserTokenMapsFromReids(String key,String token_type);
 
+    boolean updateUserNickName(String uid, String nick_name);
+
 }

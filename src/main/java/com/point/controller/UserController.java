@@ -102,12 +102,14 @@ public class UserController extends BaseController {
             map.put("uid", mongo_uid_str);
         }
 
-        return returnJsonData(Constant.DataDefault,map,"");
+        return returnJsonData(Constant.DataDefault, map, "");
     }
 
+    @RequestMapping("/singlelogin")
+    @ResponseBody
     public String singleLogin(HttpServletRequest request) {
 
-        String token = request.getParameter("token");
+        String token = request.getParameter("token");//未加密的token或者ase加密之后的token|mobile_device_num
         String uid_str = request.getParameter("uid");
 
         if (StringUtils.isEmpty(token)) {
@@ -117,8 +119,14 @@ public class UserController extends BaseController {
         String timestamp = String.valueOf(request.getAttribute("timestamp"));
         String mobile_device_num = request.getParameter("mobile_device_num");
 
+        String token_temp = EncryptionUtils.decrypt(token);
 
-        String md5_token = EncryptionUtils.encrypt(token + "|" + mobile_device_num, true);//随机加密
+        String md5_token;
+        if (null != token_temp && token_temp.contains("|")) {
+            md5_token = token_temp.split("\\|")[0];
+        } else {
+            md5_token = PublicUtil.makeMD5(token);
+        }
 
         UserInfoBean userInfoBean = userService.getUserInfobyToken(token, md5_token);
 
@@ -142,8 +150,10 @@ public class UserController extends BaseController {
             userInfoBean.setNick_name(nick_name);
             uid_str = userService.insertUserInfoToMongo(userInfoBean);
 
-            userService.insertUserTokenMapsToReids(uid_str, md5_token, "", Constant.REDIS_7_DAYS);
-            map.put("token", md5_token);
+            String redis_token = EncryptionUtils.encrypt(md5_token + "|" + mobile_device_num, false);
+
+            userService.insertUserTokenMapsToReids(uid_str, redis_token, "0", Constant.REDIS_7_DAYS);
+            map.put("token", redis_token);
             map.put("uid", uid_str);
 
         } else {
@@ -157,44 +167,87 @@ public class UserController extends BaseController {
                 if (!mongo_uid_str.equals(uid_str)) {
                     return returnJsonData(Constant.DataError, "", Constant.HttpErrorCodeSocialUserNotExist);
                 }
-
             }
+
+            String redis_token = EncryptionUtils.encrypt(mongo_token + "|" + mobile_device_num, false);
+
             if (StringUtils.isEmpty(uid_str) || mongo_uid_str.equals(uid_str)) {//用户新换手机，uid在设备中不存在，或者是之前已经登录过的设备，则uid是存在的，并且和mongo中的uid相同
 
-                if (userService.userInfoExists(mongo_uid_str)) {//redis中用户的信息已经被缓存
+                if (mongo_mobile_device_num.equals(mobile_device_num)) {//同一设备
 
-                    String now_token = userService.getUserTokenMapsFromReids(uid_str, "now_token");
-                    String old_token = userService.getUserTokenMapsFromReids(uid_str, "old_token");
+                    if (userService.userInfoExists(mongo_uid_str)) {//redis中用户的信息已经被缓存
 
-                    if (StringUtils.isEmpty(old_token)) {//说明7天内，一直是该设备登录
+                        String now_token = userService.getUserTokenMapsFromReids(mongo_uid_str, "now_token");
+                        String old_token = userService.getUserTokenMapsFromReids(mongo_uid_str, "old_token");
 
-                        if (mongo_token.equals(now_token)) {
-                            map.put("token", md5_token);
-                            map.put("uid", uid_str);
+                        if (old_token.equals("0")) {//说明7天内，一直是该设备登录
+
+                            userService.updateUserInfoToMongo(mongo_uid_str, timestamp, mobile_device_num, true);
+
+                            userService.insertUserTokenMapsToReids(mongo_uid_str, now_token, "0", Constant.REDIS_7_DAYS);
+                            map.put("token", now_token);
+                            map.put("uid", mongo_uid_str);
                         } else {
-                            userService.insertUserTokenMapsToReids(uid_str, md5_token, now_token, Constant.REDIS_7_DAYS);
-                            map.put("token", md5_token);
-                            map.put("uid", uid_str);
-                        }
-                    } else {
+                            userService.updateUserInfoToMongo(mongo_uid_str, timestamp, mobile_device_num, false);
 
-                        userService.insertUserTokenMapsToReids(uid_str, md5_token, now_token, Constant.REDIS_7_DAYS);
-                        map.put("token", md5_token);
-                        map.put("uid", uid_str);
+                            userService.insertUserTokenMapsToReids(mongo_uid_str, redis_token, old_token, Constant.REDIS_7_DAYS);
+                            map.put("token", redis_token);
+                            map.put("uid", mongo_uid_str);
+                        }
+
+
+                    } else {//用户距离上次登录，超过7天，所以redis中没有用户的缓存信息
+
+                        userService.updateUserInfoToMongo(mongo_uid_str, timestamp, mobile_device_num, true);
+
+                        userService.insertUserTokenMapsToReids(mongo_uid_str, redis_token, "0", Constant.REDIS_7_DAYS);
+                        map.put("token", redis_token);
+                        map.put("uid", mongo_uid_str);
                     }
 
+                } else {
 
-                } else {//用户距离上次登录，超过7天，所以redis中没有用户的缓存信息
-                    userService.insertUserTokenMapsToReids(uid_str, md5_token, "", Constant.REDIS_7_DAYS);
-                    map.put("token", md5_token);
-                    map.put("uid", uid_str);
+                    if (userService.userInfoExists(mongo_uid_str)) {//redis中用户的信息已经被缓存
+
+                        String now_token = userService.getUserTokenMapsFromReids(mongo_uid_str, "now_token");
+
+                        userService.updateUserInfoToMongo(mongo_uid_str, timestamp, mobile_device_num, false);
+
+                        userService.insertUserTokenMapsToReids(mongo_uid_str, redis_token, now_token, Constant.REDIS_7_DAYS);
+                        map.put("token", redis_token);
+                        map.put("uid", mongo_uid_str);
+                    } else {//用户距离上次登录，超过7天，所以redis中没有用户的缓存信息
+
+                        userService.updateUserInfoToMongo(mongo_uid_str, timestamp, mobile_device_num, false);
+
+                        userService.insertUserTokenMapsToReids(mongo_uid_str, redis_token, "0", Constant.REDIS_7_DAYS);
+                        map.put("token", redis_token);
+                        map.put("uid", mongo_uid_str);
+                    }
                 }
             }
+        }
+        return returnJsonData(Constant.DataDefault, map, "");
+    }
+
+    @RequestMapping("/returnerror")
+    @ResponseBody
+    public String returnError(){
+        return returnJsonData(Constant.UserLoginFailed,"","");
+    }
 
 
+    @RequestMapping("/updatenickname")
+    public String updateUserNickName(HttpServletRequest request){
+        String uid = request.getParameter("uid");
+        String nick_name=request.getParameter("nick_name");
+
+        if(userService.updateUserNickName(uid,nick_name)){
+            return returnJsonData(Constant.DataDefault,"","");
+        }else {
+            return returnJsonData(Constant.DataError,"","");
         }
 
-        return null;
     }
 
 

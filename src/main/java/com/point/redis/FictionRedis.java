@@ -176,4 +176,9 @@ public class FictionRedis extends BaseRedis {
         return sensitiveWords;
     }
 
+    public void updateAllFictionIdListToRedis(String key,List<Long> fiction_id_List){
+        redisTemplate.delete(key);
+        redisTemplate.opsForSet().add(key, new Gson().toJson(fiction_id_List));
+    }
+
 }

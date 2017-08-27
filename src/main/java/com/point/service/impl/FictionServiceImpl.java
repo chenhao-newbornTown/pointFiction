@@ -52,12 +52,12 @@ public class FictionServiceImpl implements FictionService {
 
         for (Long fiction_id : fiction_id_List) {
 
-            insertFictionDetailToRedis(fiction_id,fiction_page_num,key);
+            insertFictionDetailToRedis(fiction_id, fiction_page_num, key);
         }
     }
 
 
-    public void insertFictionDetailToRedis(Long fiction_id,int fiction_page_num,String key){
+    public void insertFictionDetailToRedis(Long fiction_id, int fiction_page_num, String key) {
         List<FictionDetailBean> fictionBeanList = getFictionDeatilListFromMongoByKey(fiction_id);
 
         if (null != fictionBeanList && fictionBeanList.size() > 0) {
@@ -145,6 +145,19 @@ public class FictionServiceImpl implements FictionService {
         return fiction_id_List;
     }
 
+    public void updateAllFictionIdListToRedis(String key) {
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_status").is(2)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
+
+        List<Long> fiction_id_List = new ArrayList<Long>();
+        for (FictionBean fictionBean : fictionBeanList) {
+
+            fiction_id_List.add(fictionBean.getFiction_id());
+        }
+
+        fictionRedis.updateAllFictionIdListToRedis(key, fiction_id_List);
+
+    }
+
 
     public void deleteRedisBykey(String key) {
 
@@ -230,7 +243,7 @@ public class FictionServiceImpl implements FictionService {
             mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("fiction_status").is(0)), Update.update("fiction_status", 1).set("update_time", timestamp), FictionBean.class);
 
 
-            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time", timestamp).set("update_date",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time", timestamp).set("update_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
 
             return true;
         } catch (Exception e) {
@@ -259,6 +272,27 @@ public class FictionServiceImpl implements FictionService {
 
     }
 
+    public boolean getFictionStatus(String fiction_id) {
+
+        DBObject query = new BasicDBObject();
+        query.put("fiction_id", Long.parseLong(fiction_id));
+
+        DBObject fields = new BasicDBObject();
+
+        fields.put("_id", false);
+        fields.put("fiction_status", true);
+
+        FictionBean fictionBean = mongoTemplate.findOne(new BasicQuery(query, fields), FictionBean.class);
+
+        if(fictionBean.getFiction_status()==2){
+            return true;
+        }
+        return false;
+
+
+    }
+
+
     public void incrFictionLineNum(String fiction_id, int i) {
         try {
             mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_line_num", i), FictionBean.class);
@@ -284,16 +318,16 @@ public class FictionServiceImpl implements FictionService {
         return picList;
     }
 
-    public void getMongoSensitiveWordsToRedis(String key){
+    public void getMongoSensitiveWordsToRedis(String key) {
 
         DBObject fields = new BasicDBObject();
 
         fields.put("_id", false);
         fields.put("words", true);
 
-        SensitiveWordsBean sensitiveWordsBean =  mongoTemplate.findOne(new BasicQuery(new BasicDBObject(),fields),SensitiveWordsBean.class);
+        SensitiveWordsBean sensitiveWordsBean = mongoTemplate.findOne(new BasicQuery(new BasicDBObject(), fields), SensitiveWordsBean.class);
 
-        fictionRedis.insertSensitiveWordsToRedis(key,sensitiveWordsBean.getWords());
+        fictionRedis.insertSensitiveWordsToRedis(key, sensitiveWordsBean.getWords());
     }
 
     public List<String> getMongoSensitiveWordsFromRedis(String key) {
@@ -303,19 +337,19 @@ public class FictionServiceImpl implements FictionService {
         return sensitiveWordsList;
     }
 
-    public void insertUserLikeCount(String uid,String fiction_id){
+    public void insertUserLikeCount(String uid, String fiction_id) {
 
-        mongoTemplate.upsert(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(Long.parseLong(fiction_id))),Update.update("user_like_count","1"),UserFictionBean.class);
+        mongoTemplate.upsert(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(Long.parseLong(fiction_id))), Update.update("user_like_count", "1"), UserFictionBean.class);
 
     }
 
-    public String getUserLikeCountStatus(String uid,String fiction_id){
+    public String getUserLikeCountStatus(String uid, String fiction_id) {
 
-        UserFictionBean userFictionBean = mongoTemplate.findOne(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(Long.parseLong(fiction_id))),UserFictionBean.class);
+        UserFictionBean userFictionBean = mongoTemplate.findOne(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(Long.parseLong(fiction_id))), UserFictionBean.class);
 
-        if(null == userFictionBean){
+        if (null == userFictionBean) {
             return "0";
-        }else {
+        } else {
             return userFictionBean.getUser_like_count();
         }
     }

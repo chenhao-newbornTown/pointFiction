@@ -165,14 +165,27 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    public void insertUserTokenMapsToReids(String uid_str,String now_token,String old_token,long time){
+    public void insertUserTokenMapsToReids(String uid_str, String now_token, String old_token, long time) {
 
         userRedis.insertUserTokenMapsToReids(uid_str, now_token, old_token, time);
     }
 
-    public String getUserTokenMapsFromReids(String key,String token_type){
+    public String getUserTokenMapsFromReids(String key, String token_type) {
 
-        return userRedis.getUserTokenMapsFromReids(key,token_type);
+        return userRedis.getUserTokenMapsFromReids(key, token_type);
+    }
+
+    public boolean updateUserNickName(String uid, String nick_name) {
+
+        try {
+            mongoTemplate.upsert(new Query(Criteria.where("uid").is(Long.parseLong(uid))), Update.update("nick_name", nick_name), UserInfoBean.class);
+            return true;
+        }catch (Exception e){
+            logger.error("updateUserNickName is error,uid={},nick_name={}", uid,nick_name);
+            return false;
+        }
+
+
     }
 
 

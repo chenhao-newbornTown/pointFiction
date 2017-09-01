@@ -134,7 +134,7 @@
                 <td height="285px">
                     <div id="imgPreview">
                         <c:if test="${addOrUpdate=='update'}">
-                            <img src="<c:out value="${baseurl}"/>/<c:out value='${fictionBean.fiction_pic_path}'/>" >
+                            <img src="<c:out value="${baseurl}"/>/<c:out value='${fictionBean.fiction_pic_path}'/>" width='115px' height='205px'>
                         </c:if>
                     </div>
                 </td>
@@ -150,17 +150,18 @@
             </tr>
             <tr/>
             <tr>
-                <td>故事名：</td>
-                <td>
-                    <input name="fiction_name" id="fiction_name" value="<c:out value='${fictionBean.fiction_name}'/>"
-                           style="width: 250px;"/>
-                </td>
-            </tr>
-            <tr>
                 <td>作者：</td>
                 <td>
                     <input name="fiction_author_name" id="fiction_author_name"
                            value="<c:out value='${fictionBean.fiction_author_name}'/>"
+                           style="width: 250px;"/>
+                </td>
+            </tr>
+            <tr/>
+            <tr>
+                <td>故事名：</td>
+                <td>
+                    <input name="fiction_name" id="fiction_name" value="<c:out value='${fictionBean.fiction_name}'/>"
                            style="width: 250px;"/>
                 </td>
             </tr>

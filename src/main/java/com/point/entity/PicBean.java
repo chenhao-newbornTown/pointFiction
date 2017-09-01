@@ -20,6 +20,17 @@ public class PicBean {
 
     public String pic_status;//1,admin,2,user
 
+    public long uid;
+
+
+    public long getUid() {
+        return uid;
+    }
+
+    public void setUid(long uid) {
+        this.uid = uid;
+    }
+
     public String getPic_status() {
         return pic_status;
     }

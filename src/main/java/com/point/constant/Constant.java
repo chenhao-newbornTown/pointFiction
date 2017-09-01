@@ -38,6 +38,7 @@ public class Constant {
     public static final String DelAcrotNameError = "小说角色发生过对话";   // 小说角色发生过对话，删除失败
     public static final String IncLikeCountSuccessed = "点赞成功";
     public static final String IncLikeCountFailed = "点赞失败";
+    public static final String UploadPicFailed = "上传图片失败";
 
 
     public static final String DataDefault = "00000";
@@ -53,5 +54,7 @@ public class Constant {
     public static final String FictionStatusDeatilError = "100002";//小说内容违规被删
     public static final String UserReadLineError = "100003";//小说阅读行数为空
     public static final String UserLoginFailed = "300001";     // 账号已在其他地方登录
+    public static final String UploadPicError = "400001";//上传的图片为空
+
 
 }

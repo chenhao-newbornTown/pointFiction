@@ -1,8 +1,12 @@
 package com.point.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.point.constant.Constant;
+import com.point.entity.UserFictionBean;
+import com.point.entity.UserFictionWithOutLoginBean;
 import com.point.entity.UserInfoBean;
+import com.point.service.UserFictionService;
 import com.point.service.UserService;
 import com.point.util.EncryptionUtils;
 import com.point.util.PublicUtil;
@@ -15,7 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,6 +38,9 @@ public class UserController extends BaseController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    UserFictionService userFictionService;
 
     /**
      * 判断用户是否存在，存在的话，则更新登录时间，
@@ -155,12 +164,14 @@ public class UserController extends BaseController {
             userService.insertUserTokenMapsToReids(uid_str, redis_token, "0", Constant.REDIS_7_DAYS);
             map.put("token", redis_token);
             map.put("uid", uid_str);
+            map.put("nick_name",nick_name);
 
         } else {
 
             String mongo_uid_str = String.valueOf(userInfoBean.getUid());
             String mongo_token = userInfoBean.getToken();//aes(token|mobile_device_num)
             String mongo_mobile_device_num = userInfoBean.getMobile_device_num();
+
 
 
             if (StringUtils.isNotEmpty(uid_str)) {//token存在，uid不为空，而且和mongo中的uid不同，则说明该帐号不存在
@@ -172,6 +183,9 @@ public class UserController extends BaseController {
             String redis_token = EncryptionUtils.encrypt(mongo_token + "|" + mobile_device_num, false);
 
             if (StringUtils.isEmpty(uid_str) || mongo_uid_str.equals(uid_str)) {//用户新换手机，uid在设备中不存在，或者是之前已经登录过的设备，则uid是存在的，并且和mongo中的uid相同
+
+                String nick_name = userInfoBean.getNick_name();
+                map.put("nick_name", nick_name);
 
                 if (mongo_mobile_device_num.equals(mobile_device_num)) {//同一设备
 
@@ -223,17 +237,45 @@ public class UserController extends BaseController {
                         userService.insertUserTokenMapsToReids(mongo_uid_str, redis_token, "0", Constant.REDIS_7_DAYS);
                         map.put("token", redis_token);
                         map.put("uid", mongo_uid_str);
+
                     }
                 }
             }
         }
+
+
+        String user_read_history_json = request.getParameter("user_read_history");
+
+        if(null != user_read_history_json){
+
+            List<UserFictionBean> userFictionBeanList = new ArrayList<UserFictionBean>();
+
+            List<UserFictionWithOutLoginBean> list = new Gson().fromJson(user_read_history_json,new TypeToken<List<UserFictionWithOutLoginBean>>(){}.getType());
+
+            for (UserFictionWithOutLoginBean userFictionWithOutLoginBean : list) {
+
+                UserFictionBean userFictionBean = new UserFictionBean();
+
+                userFictionBean.setUid(Long.parseLong(map.get("uid")));
+                userFictionBean.setFiction_id(userFictionWithOutLoginBean.getFiction_id());
+                userFictionBean.setFiction_name(userFictionWithOutLoginBean.getFiction_name());
+                userFictionBean.setUser_read_timestamp(userFictionWithOutLoginBean.getUser_read_timestamp());
+                userFictionBean.setUser_read_line(userFictionWithOutLoginBean.getUser_read_line());
+                userFictionBean.setUser_like_count("0");
+
+                userFictionBeanList.add(userFictionBean);
+            }
+
+            userFictionService.saveUserWithOutLoginReadFictionInfo(userFictionBeanList);
+        }
+
         return returnJsonData(Constant.DataDefault, map, "");
     }
 
     @RequestMapping("/returnerror")
     @ResponseBody
     public String returnError(){
-        return returnJsonData(Constant.UserLoginFailed,"","");
+        return Constant.UserLoginFailed;
     }
 
 

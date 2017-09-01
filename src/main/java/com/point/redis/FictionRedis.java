@@ -45,10 +45,45 @@ public class FictionRedis extends BaseRedis {
 
     public void insertFictionListToRedis(String key, Map<String, List<FictionDetailBean>> map) {
 
+        TreeSet<Long> page_list = new TreeSet<Long>();
+
+        String pagenum_key = "";
+
         for (Map.Entry<String, List<FictionDetailBean>> listEntry : map.entrySet()) {
             redisTemplate.opsForHash().put(key + listEntry.getKey().split("\\_")[1], listEntry.getKey().split("\\_")[0], new Gson().toJson(listEntry.getValue()));
+
+
+            List<FictionDetailBean> fictionDetailBeanList = listEntry.getValue();
+
+            FictionDetailBean fictionDetailBean = fictionDetailBeanList.get(fictionDetailBeanList.size() - 1);
+
+            page_list.add(fictionDetailBean.getActor_fiction_detail_index());
+
+            pagenum_key = listEntry.getKey().split("\\_")[1];
+        }
+
+        if (page_list.size() > 0) {
+            redisTemplate.opsForValue().set("fiction_page_info_" + pagenum_key, new Gson().toJson(page_list));
         }
     }
+
+
+    public TreeSet<Long> getFictionPageInfo(String key) {
+
+        String page_num_info = redisTemplate.opsForValue().get(key).toString();
+
+        Gson gson = new Gson();
+        TreeSet<Long> page_list = new TreeSet<Long>();
+
+        if (null != page_num_info) {
+            page_list = gson.fromJson(page_num_info, new TypeToken<TreeSet<Long>>() {
+            }.getType());
+        }
+
+        return page_list;
+
+    }
+
 
     public List<Long> getAllFictionIdListFromReidsByKey(String key) {
 
@@ -63,8 +98,6 @@ public class FictionRedis extends BaseRedis {
             if (!StringUtils.isEmpty(s)) {
                 fiction_daily_Set.add(Long.parseLong(s));
             }
-
-
         }
 
         return fiction_daily_Set;
@@ -122,7 +155,7 @@ public class FictionRedis extends BaseRedis {
 
         String likecountStr = String.valueOf(redisTemplate.opsForValue().get("likecount_" + fiction_id));
 
-        if (!StringUtils.isEmpty(likecountStr)&& !likecountStr.equals("null")) {
+        if (!StringUtils.isEmpty(likecountStr) && !likecountStr.equals("null")) {
             likecount = Long.parseLong(likecountStr);
         }
         return likecount;
@@ -144,7 +177,7 @@ public class FictionRedis extends BaseRedis {
 
     public List<String> getPicListFromRedis(String key) {
 
-        String jsonPicList =String.valueOf(redisTemplate.opsForValue().get(key));
+        String jsonPicList = String.valueOf(redisTemplate.opsForValue().get(key));
 
         List<String> picList = null;
 
@@ -157,9 +190,9 @@ public class FictionRedis extends BaseRedis {
     }
 
 
-    public void insertSensitiveWordsToRedis(String key,List<String> words){
+    public void insertSensitiveWordsToRedis(String key, List<String> words) {
 
-        redisTemplate.opsForValue().set(key,new Gson().toJson(words));
+        redisTemplate.opsForValue().set(key, new Gson().toJson(words));
     }
 
     public List<String> getSensitiveWordsFromRedis(String key) {
@@ -176,7 +209,7 @@ public class FictionRedis extends BaseRedis {
         return sensitiveWords;
     }
 
-    public void updateAllFictionIdListToRedis(String key,List<Long> fiction_id_List){
+    public void updateAllFictionIdListToRedis(String key, List<Long> fiction_id_List) {
         redisTemplate.delete(key);
         redisTemplate.opsForSet().add(key, new Gson().toJson(fiction_id_List));
     }

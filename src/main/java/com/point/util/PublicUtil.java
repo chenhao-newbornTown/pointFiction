@@ -110,6 +110,25 @@ public class PublicUtil {
     }
 
 
+    public static PicBean saveFile(MultipartFile file) {
+
+        PicBean picBean = new PicBean();
+        // 判断文件是否为空
+        try {
+            // 转存文件
+            int random = new Random().nextInt(1000);
+            String filename = String.valueOf(System.currentTimeMillis() + random) + ".jpg";
+            file.transferTo(new File(Constant.PicPath + File.separator + filename));
+            picBean.setPic_name(filename);
+            picBean.setPic_upload_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        } catch (Exception e) {
+            picBean = null;
+            e.printStackTrace();
+        }
+        return picBean;
+    }
+
+
     public static PicBean uploadPic(MultipartFile file) {
 
         BufferedOutputStream stream = null;
@@ -117,8 +136,8 @@ public class PublicUtil {
         PicBean picBean = new PicBean();
         try {
             byte[] bytes = file.getBytes();
-
-            String filename = String.valueOf(System.currentTimeMillis()) + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+            int random = new Random().nextInt(1000);
+            String filename = String.valueOf(System.currentTimeMillis() + random) + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
             stream = new BufferedOutputStream(new FileOutputStream(new File(Constant.PicPath + File.separator + filename)));
             stream.write(bytes);
             stream.close();
@@ -213,7 +232,7 @@ public class PublicUtil {
 
         mongoTemplate.insert(fictionDetailBeanList, FictionDetailBean.class);
         mongoTemplate.insert(fictionActorBeanList, FictionActorBean.class);
-        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(fiction_id)), Update.update("fiction_name", fiction_name).set("fiction_author_name", fiction_author_name).set("update_time",String.valueOf(System.currentTimeMillis())).set("update_date",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(fiction_id)), Update.update("fiction_name", fiction_name).set("fiction_author_name", fiction_author_name).set("update_time", String.valueOf(System.currentTimeMillis())).set("update_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
 
         if (tempFile.exists()) {
             tempFile.delete();

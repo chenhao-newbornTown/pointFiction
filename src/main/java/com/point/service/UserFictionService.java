@@ -1,9 +1,6 @@
 package com.point.service;
 
-import com.point.entity.FictionActorBean;
-import com.point.entity.FictionBean;
-import com.point.entity.FictionDetailBean;
-import com.point.entity.UserFictionBean;
+import com.point.entity.*;
 
 import java.util.List;
 import java.util.Map;
@@ -68,6 +65,12 @@ public interface UserFictionService {
     long getuserLatestFictionLine(String uid,long fiction_id);
 
     List<FictionActorBean> getFictionActorListByFictionid(long fiction_id);
+
+    void saveUserWithOutLoginReadFictionInfo(List<UserFictionBean> userFictionBeanList);
+
+    long getUserReadFictionPageNumInfo(String uid,String fiction_id);
+
+    String insertPic(PicBean picBean);
 
 
 }

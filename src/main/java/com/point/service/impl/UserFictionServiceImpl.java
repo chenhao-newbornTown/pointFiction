@@ -5,6 +5,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.point.entity.*;
 import com.point.mongo.FictionDeatilRepository;
+import com.point.mongo.PicRepostitory;
 import com.point.mongo.UserFictionRepository;
 import com.point.redis.UserFictionRedis;
 import com.point.service.UserFictionService;
@@ -42,6 +43,9 @@ public class UserFictionServiceImpl implements UserFictionService {
 
     @Autowired
     FictionDeatilRepository fictionDeatilRepository;
+
+    @Autowired
+    PicRepostitory picRepostitory;
 
 
     @Override
@@ -337,6 +341,26 @@ public class UserFictionServiceImpl implements UserFictionService {
         }
     }
 
+
+    public long getUserReadFictionPageNumInfo(String uid,String fiction_id) {
+
+        DBObject queryObject = new BasicDBObject();
+        queryObject.put("uid", Long.parseLong(uid));
+        queryObject.put("fiction_id", Long.parseLong(fiction_id));
+
+        DBObject fields = new BasicDBObject();
+        fields.put("_id", false);
+        fields.put("user_read_line", true);
+
+        UserFictionBean userFictionBean = mongoTemplate.findOne(new BasicQuery(queryObject, fields), UserFictionBean.class);
+
+        if(null == userFictionBean){
+            return 1L;
+        }else {
+            return userFictionBean.getUser_read_line();
+        }
+    }
+
     public void updateUserLatestFictionInfo(String fiction_id, String uid, long user_read_line) {
 
         mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("uid").is(Long.parseLong(uid))),Update.update("user_read_line",user_read_line),UserFictionBean.class);
@@ -366,10 +390,26 @@ public class UserFictionServiceImpl implements UserFictionService {
         }else {
             return null;
         }
+    }
 
+
+    public void saveUserWithOutLoginReadFictionInfo(List<UserFictionBean> userFictionBeanList){
+
+        for (UserFictionBean userFictionBean : userFictionBeanList) {
+
+            mongoTemplate.upsert(new Query(Criteria.where("uid").is(userFictionBean.getUid()).and("fiction_id").is(userFictionBean.getFiction_id()).and("fiction_name").is(userFictionBean.getFiction_name())),
+                    Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()).set("user_read_line",userFictionBean.getUser_read_line()).set("user_like_count",userFictionBean.getUser_like_count()), userFictionBean.getClass());
+        }
 
     }
 
 
+    public String insertPic(PicBean picBean){
 
+        PicBean picMongoBean = picRepostitory.insert(picBean);
+        String fiction_pic_path = picMongoBean.getPic_name();
+
+        return fiction_pic_path;
+
+    }
 }

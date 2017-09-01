@@ -241,6 +241,7 @@ public class WebController {
                     if (null != picBean && uploadpic) {
                         picBean.setPic_status("1");
                         picBean.setUse_pic_num(1);
+                        picBean.setUid(Long.parseLong("888888"));
                         PicBean picMongoBean = picRepostitory.insert(picBean);
                         fiction_pic_path = picMongoBean.getPic_name();
                     }
@@ -250,6 +251,7 @@ public class WebController {
                         if (null != picBean && uploadpic) {
                             picBean.setPic_status("1");
                             picBean.setUse_pic_num(1);
+                            picBean.setUid(Long.parseLong("888888"));
                             PicBean picMongoBean = picRepostitory.insert(picBean);
                             fiction_pic_path = picMongoBean.getPic_name();
                             uploadpic = false;
@@ -298,6 +300,7 @@ public class WebController {
                     if (null != picBean && uploadpic) {
                         picBean.setPic_status("1");
                         picBean.setUse_pic_num(1);
+                        picBean.setUid(Long.parseLong("888888"));
                         PicBean picMongoBean = picRepostitory.insert(picBean);
                         fiction_pic_path = picMongoBean.getPic_name();
                     }
@@ -307,6 +310,7 @@ public class WebController {
                         if (null != picBean && uploadpic) {
                             picBean.setPic_status("1");
                             picBean.setUse_pic_num(1);
+                            picBean.setUid(Long.parseLong("888888"));
                             PicBean picMongoBean = picRepostitory.insert(picBean);
                             fiction_pic_path = picMongoBean.getPic_name();
                             uploadpic = false;

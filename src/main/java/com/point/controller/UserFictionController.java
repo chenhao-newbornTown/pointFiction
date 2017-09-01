@@ -1,6 +1,7 @@
 package com.point.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.point.constant.Constant;
 import com.point.entity.*;
 import com.point.service.FictionService;
@@ -8,12 +9,17 @@ import com.point.service.UserFictionService;
 import com.point.service.UserService;
 import com.point.util.PublicUtil;
 import org.apache.commons.lang.StringUtils;
+import org.json.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -80,6 +86,7 @@ public class UserFictionController extends BaseController {
 
             if (!StringUtils.isEmpty(uid)) {
                 fictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid, fiction_id));
+                fictionBean.setUser_read_line(userFictionService.getUserReadFictionPageNumInfo(uid, fiction_id));
             }
 
             fictionBeanList.add(fictionBean);
@@ -160,9 +167,14 @@ public class UserFictionController extends BaseController {
         }
 
         String fiction_page_num = request.getParameter("fiction_page_num");
+        String user_read_line = request.getParameter("user_read_line");
+
+        if (StringUtils.isEmpty(fiction_page_num) && StringUtils.isEmpty(user_read_line)) {
+            return returnJsonData(Constant.DataError, "", Constant.FictionPageNumError);
+        }
 
         if (StringUtils.isEmpty(fiction_page_num)) {
-            return returnJsonData(Constant.DataError, "", Constant.FictionPageNumError);
+            fiction_page_num = fictionService.getReadUserReadPageNum("fiction_page_info_" + fiction_id, user_read_line);
         }
 
         String key = "fiction_info_deatil";
@@ -171,9 +183,13 @@ public class UserFictionController extends BaseController {
         if (null == fictionDetailBeanList || fictionDetailBeanList.size() <= 0) {
             int page_num = 20;
             fictionDetailBeanList = userFictionService.getFictionDetailInfoByIdForMongo(fiction_id, fiction_page_num, page_num);
-
         }
-        return returnJsonData(Constant.DataDefault, fictionDetailBeanList, "");
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("fiction_detail", fictionDetailBeanList);
+        map.put("fiction_page_num", fiction_page_num);
+
+        return returnJsonData(Constant.DataDefault, map, "");
     }
 
     /**
@@ -187,7 +203,11 @@ public class UserFictionController extends BaseController {
 
         String fiction_id = request.getParameter("fiction_id");
         String uid = request.getParameter("uid");
-        Long user_read_line = Long.parseLong(request.getParameter("user_read_line"));
+        Long user_read_line = 1L;
+
+        if (null != request.getParameter("user_read_line")) {
+            user_read_line = Long.parseLong(request.getParameter("user_read_line"));
+        }
 
         userFictionService.updateUserLatestFictionInfo(fiction_id, uid, user_read_line);
 
@@ -213,7 +233,7 @@ public class UserFictionController extends BaseController {
             userFictionBean.setFiction_id(Long.parseLong(fiction_id));
             userFictionBean.setFiction_name(fictionService.getFictionInfoByFictionidFromRedis("fiction_info_all", fiction_id).getFiction_name());
             userFictionBean.setUser_read_timestamp(request.getAttribute("timestamp").toString());
-            userFictionBean.setUser_read_line(0L);
+            userFictionBean.setUser_read_line(1L);
             userFictionBean.setUser_like_count("0");
             userFictionService.insertUserFictionToMongo(userFictionBean);
         }
@@ -371,7 +391,7 @@ public class UserFictionController extends BaseController {
 
     /**
      * 编辑小说的时候，获取上一页，
-     * 加入获取上一页的时候，所有小说的状态都为fiction_detail_status：1，
+     * 假如获取上一页的时候，所有小说的状态都为fiction_detail_status：1，
      * 则，再获取上一页的时候，访问/getfictiondetail 方法
      *
      * @param request
@@ -383,6 +403,7 @@ public class UserFictionController extends BaseController {
 
         String fiction_id = request.getParameter("fiction_id");
         long fiction_page_num = Long.parseLong(request.getParameter("fiction_page_num"));
+
 
         long page_num = 20;
 
@@ -448,12 +469,11 @@ public class UserFictionController extends BaseController {
 
         String fiction_id = request.getParameter("fiction_id");
         String uid = request.getParameter("uid");
-        String fiction_status = request.getParameter("fiction_status");
-
+        //  String fiction_status = request.getParameter("fiction_status");
         boolean delstatus = userFictionService.delMyFiction(fiction_id, uid);
         if (delstatus) {
 
-            if (fiction_status.equals("2")) {
+            if (fictionService.getFictionStatus(fiction_id)) {
                 fictionService.deleteRedisBykey("fiction_info_deatil_" + fiction_id);
 
                 fictionService.updateAllFictionIdListToRedis("fiction_idlist_all");
@@ -653,7 +673,7 @@ public class UserFictionController extends BaseController {
 
         String timestamp = request.getAttribute("timestamp").toString();
 
-       // String fiction_status = request.getParameter("fiction_status");
+        // String fiction_status = request.getParameter("fiction_status");
 
         boolean fictionDetailStatus = userFictionService.releaseFictionDetail(fiction_id);
         boolean fictionStatus = fictionService.releaseFiction(fiction_id, timestamp);
@@ -664,7 +684,8 @@ public class UserFictionController extends BaseController {
             if (fictionService.getFictionStatus(fiction_id)) {
                 String key = "fiction_info_deatil_";
 
-                fictionService.deleteRedisBykey(key);
+                fictionService.deleteRedisBykey(key + fiction_id);
+                fictionService.deleteRedisBykey("fiction_page_info_" + fiction_id);
 
                 fictionService.insertFictionDetailToRedis(Long.parseLong(fiction_id), 20, key);
             }
@@ -683,6 +704,7 @@ public class UserFictionController extends BaseController {
      * @param request
      */
     @RequestMapping("/updateredisfictiondetail")
+    @ResponseBody
     public String updateFictionDetail(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
@@ -690,7 +712,8 @@ public class UserFictionController extends BaseController {
         if (fictionService.getFictionStatus(fiction_id)) {
             String key = "fiction_info_deatil_";
             try {
-                fictionService.deleteRedisBykey(key);
+                fictionService.deleteRedisBykey(key + fiction_id);
+                fictionService.deleteRedisBykey("fiction_page_info_" + fiction_id);
 
                 fictionService.insertFictionDetailToRedis(Long.parseLong(fiction_id), 20, key);
 
@@ -701,5 +724,42 @@ public class UserFictionController extends BaseController {
         }
         return returnJsonData(Constant.DataDefault, "", "");
     }
+
+
+    @RequestMapping(method = RequestMethod.POST,value = "/useruploadpic")
+    @ResponseBody
+    public String uploadFictionPic(HttpServletRequest request,@RequestParam("pic") MultipartFile[] files) {
+
+//        MultipartResolver resolver = new CommonsMultipartResolver(request.getSession().getServletContext());
+//        MultipartHttpServletRequest multipartRequest = resolver.resolveMultipart(request);
+//        DefaultMultipartHttpServletRequest defaultMultipartHttpServletRequest = new DefaultMultipartHttpServletRequest(multipartRequest);
+//        MultiValueMap<String, MultipartFile> fileMap = defaultMultipartHttpServletRequest.getMultiFileMap();
+
+        MultipartFile file =files[0];//multipartRequest.getFile("pic");
+
+        if (file.isEmpty()) {
+            return returnJsonData(Constant.DataError, "", Constant.UploadPicError);
+        }
+
+        String uid = request.getParameter("uid");
+
+        PicBean picBean = PublicUtil.saveFile(file);//uploadPic(file);
+
+        if (null != picBean) {
+            picBean.setPic_status("2");
+            picBean.setUse_pic_num(1);
+            picBean.setUid(Long.parseLong(uid));
+            String fiction_pic_path = userFictionService.insertPic(picBean);
+
+            System.out.println(returnJsonData(Constant.DataDefault, fiction_pic_path, ""));
+
+            return returnJsonData(Constant.DataDefault, fiction_pic_path, "");
+        } else {
+
+            System.out.println(returnJsonData(Constant.DataError, "", Constant.UploadPicFailed));
+            return returnJsonData(Constant.DataError, "", Constant.UploadPicFailed);
+        }
+    }
+
 
 }

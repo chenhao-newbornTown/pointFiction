@@ -39,7 +39,7 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 
                 String queryString = request.getQueryString();
 
-                String ip = String.valueOf(request.getAttribute("X-real-ip"));//PublicUtil.getIpAddress(request);
+                String ip = PublicUtil.getIpAddress(request);//String.valueOf(request.getAttribute("X-real-ip"));
 
                 if (StringUtils.isEmpty(queryString)) {
                     logger.info(request.getMethod() + "-----ip----->" + ip + "----->" + request.getRequestURL().toString());

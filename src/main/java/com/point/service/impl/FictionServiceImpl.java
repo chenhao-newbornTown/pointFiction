@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import javax.xml.soap.SAAJMetaFactory;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -284,7 +285,8 @@ public class FictionServiceImpl implements FictionService {
 
         FictionBean fictionBean = mongoTemplate.findOne(new BasicQuery(query, fields), FictionBean.class);
 
-        if(fictionBean.getFiction_status()==2){
+
+        if (null != fictionBean && fictionBean.getFiction_status() == 2) {
             return true;
         }
         return false;
@@ -354,5 +356,23 @@ public class FictionServiceImpl implements FictionService {
         }
     }
 
+    public String getReadUserReadPageNum(String key, String user_read_line) {
 
+        TreeSet<Long> page_list = fictionRedis.getFictionPageInfo(key);
+
+        int i = 1;
+
+        if (page_list.size() > 0) {
+            for (Long page_info_num : page_list) {
+
+                if (Long.parseLong(user_read_line) < page_info_num) {
+                    break;
+                }
+
+                i++;
+
+            }
+        }
+        return String.valueOf(i);
+    }
 }

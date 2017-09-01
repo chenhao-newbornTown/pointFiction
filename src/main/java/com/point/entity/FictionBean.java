@@ -25,6 +25,7 @@ public class FictionBean {
     private String update_time;//小说上传/更新时间时间
     private String update_date;//小说上传/更新时间时间
     private String fiction_pic_path;//小说封面配图名称
+    private long user_read_line= 1L;
 
     private long read_count;//小说阅读数
     private long like_count;//小说点赞数
@@ -37,6 +38,14 @@ public class FictionBean {
     private String status;//小说状态--->图片被删，小说被删，默认00000
 
     private String user_like_count_status;//0,未点赞，1，已点赞
+
+    public long getUser_read_line() {
+        return user_read_line;
+    }
+
+    public void setUser_read_line(long user_read_line) {
+        this.user_read_line = user_read_line;
+    }
 
     public String getUpdate_date() {
         return update_date;
@@ -160,11 +169,15 @@ public class FictionBean {
                 ", fiction_author_id='" + fiction_author_id + '\'' +
                 ", fiction_author_name='" + fiction_author_name + '\'' +
                 ", update_time='" + update_time + '\'' +
+                ", update_date='" + update_date + '\'' +
                 ", fiction_pic_path='" + fiction_pic_path + '\'' +
+                ", user_read_line=" + user_read_line +
                 ", read_count=" + read_count +
                 ", like_count=" + like_count +
                 ", fiction_line_num=" + fiction_line_num +
                 ", fiction_status=" + fiction_status +
+                ", status='" + status + '\'' +
+                ", user_like_count_status='" + user_like_count_status + '\'' +
                 '}';
     }
 }

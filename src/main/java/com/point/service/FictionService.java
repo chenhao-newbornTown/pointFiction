@@ -83,4 +83,6 @@ public interface FictionService {
 
     boolean getFictionStatus(String fiction_id);
 
+    String getReadUserReadPageNum(String key, String user_read_line);
+
 }

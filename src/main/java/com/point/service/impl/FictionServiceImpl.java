@@ -297,7 +297,14 @@ public class FictionServiceImpl implements FictionService {
 
     public void incrFictionLineNum(String fiction_id, int i) {
         try {
-            mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_line_num", i), FictionBean.class);
+
+            if(i>0){
+                mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_original_num", i).inc("fiction_line_num",1), FictionBean.class);
+            }else{
+                mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_original_num", i), FictionBean.class);
+            }
+
+
         } catch (Exception e) {
             logger.error("incrFictionLineNum is error,fiction_id={}", fiction_id);
         }

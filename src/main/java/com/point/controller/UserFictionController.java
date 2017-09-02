@@ -445,6 +445,7 @@ public class UserFictionController extends BaseController {
         fictionBean.setUpdate_date(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         fictionBean.setFiction_pic_path(fiction_pic_path);
         fictionBean.setFiction_line_num(0);
+        fictionBean.setFiction_original_num(0);
         fictionBean.setFiction_status(0);
         fictionBean.setStatus(Constant.FictionStatusDefault);
         fictionBean.setUser_like_count_status("0");

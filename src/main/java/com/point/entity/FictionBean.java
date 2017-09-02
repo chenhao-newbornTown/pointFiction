@@ -32,6 +32,7 @@ public class FictionBean {
  //   private List<String> fiction_actors;//小说人物列表，[旁白默认不存]
 
     private long fiction_line_num;//小说行数
+    private long fiction_original_num;//小说原始行数
 
     private int fiction_status; //0，未发布，1，已发布，2加入推荐池子
 
@@ -159,6 +160,13 @@ public class FictionBean {
         this.like_count = like_count;
     }
 
+    public long getFiction_original_num() {
+        return fiction_original_num;
+    }
+
+    public void setFiction_original_num(long fiction_original_num) {
+        this.fiction_original_num = fiction_original_num;
+    }
 
     @Override
     public String toString() {
@@ -175,6 +183,7 @@ public class FictionBean {
                 ", read_count=" + read_count +
                 ", like_count=" + like_count +
                 ", fiction_line_num=" + fiction_line_num +
+                ", fiction_original_num=" + fiction_original_num +
                 ", fiction_status=" + fiction_status +
                 ", status='" + status + '\'' +
                 ", user_like_count_status='" + user_like_count_status + '\'' +

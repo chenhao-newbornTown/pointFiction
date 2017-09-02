@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,8 +50,6 @@ public class UserController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/login")
-    @ResponseBody
     public String login(HttpServletRequest request) {
 
         String token = request.getParameter("token");
@@ -114,7 +113,7 @@ public class UserController extends BaseController {
         return returnJsonData(Constant.DataDefault, map, "");
     }
 
-    @RequestMapping("/singlelogin")
+    @RequestMapping(method = RequestMethod.POST, value = "/singlelogin")
     @ResponseBody
     public String singleLogin(HttpServletRequest request) {
 
@@ -164,14 +163,13 @@ public class UserController extends BaseController {
             userService.insertUserTokenMapsToReids(uid_str, redis_token, "0", Constant.REDIS_7_DAYS);
             map.put("token", redis_token);
             map.put("uid", uid_str);
-            map.put("nick_name",nick_name);
+            map.put("nick_name", nick_name);
 
         } else {
 
             String mongo_uid_str = String.valueOf(userInfoBean.getUid());
             String mongo_token = userInfoBean.getToken();//aes(token|mobile_device_num)
             String mongo_mobile_device_num = userInfoBean.getMobile_device_num();
-
 
 
             if (StringUtils.isNotEmpty(uid_str)) {//token存在，uid不为空，而且和mongo中的uid不同，则说明该帐号不存在
@@ -246,11 +244,12 @@ public class UserController extends BaseController {
 
         String user_read_history_json = request.getParameter("user_read_history");
 
-        if(null != user_read_history_json){
+        if (null != user_read_history_json) {
 
             List<UserFictionBean> userFictionBeanList = new ArrayList<UserFictionBean>();
 
-            List<UserFictionWithOutLoginBean> list = new Gson().fromJson(user_read_history_json,new TypeToken<List<UserFictionWithOutLoginBean>>(){}.getType());
+            List<UserFictionWithOutLoginBean> list = new Gson().fromJson(user_read_history_json, new TypeToken<List<UserFictionWithOutLoginBean>>() {
+            }.getType());
 
             for (UserFictionWithOutLoginBean userFictionWithOutLoginBean : list) {
 
@@ -272,22 +271,22 @@ public class UserController extends BaseController {
         return returnJsonData(Constant.DataDefault, map, "");
     }
 
-    @RequestMapping("/returnerror")
+    @RequestMapping(method = RequestMethod.POST,value = "/returnerror")
     @ResponseBody
-    public String returnError(){
+    public String returnError() {
         return Constant.UserLoginFailed;
     }
 
 
     @RequestMapping("/updatenickname")
-    public String updateUserNickName(HttpServletRequest request){
+    public String updateUserNickName(HttpServletRequest request) {
         String uid = request.getParameter("uid");
-        String nick_name=request.getParameter("nick_name");
+        String nick_name = request.getParameter("nick_name");
 
-        if(userService.updateUserNickName(uid,nick_name)){
-            return returnJsonData(Constant.DataDefault,"","");
-        }else {
-            return returnJsonData(Constant.DataError,"","");
+        if (userService.updateUserNickName(uid, nick_name)) {
+            return returnJsonData(Constant.DataDefault, "", "");
+        } else {
+            return returnJsonData(Constant.DataError, "", "");
         }
 
     }

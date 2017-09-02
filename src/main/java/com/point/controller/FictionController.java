@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -100,12 +101,12 @@ public class FictionController extends BaseController {
 
      * @RequestMapping("/getreadcount") public String getreadCountByFictionid(HttpServletRequest request) {
 
-     String fiction_id = request.getParameter("fiction_id");
+    String fiction_id = request.getParameter("fiction_id");
 
-     long read_count = fictionService.getReadAndLikeCountByFictionidFromMongo(fiction_id, "read_count");
+    long read_count = fictionService.getReadAndLikeCountByFictionidFromMongo(fiction_id, "read_count");
 
-     return String.valueOf(read_count);
-     }*/
+    return String.valueOf(read_count);
+    }*/
 
     /**
      * 从redis中获取小说的likecount
@@ -113,7 +114,7 @@ public class FictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getlikecount")
+    @RequestMapping(method = RequestMethod.POST, value = "/getlikecount")
     public String getlikeCountByFictionid(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
@@ -130,7 +131,7 @@ public class FictionController extends BaseController {
      *
      * @param request
      */
-    @RequestMapping("inclikecount")
+    @RequestMapping(method = RequestMethod.POST, value = "inclikecount")
     @ResponseBody
     public String incLikeCountByFictionid(HttpServletRequest request) {
 
@@ -153,7 +154,7 @@ public class FictionController extends BaseController {
     /**
      * 更新所有的小说入redis
      */
-    @RequestMapping("/uploadredis")
+    @RequestMapping(method = RequestMethod.POST, value = "/uploadredis")
     public void flushRedisAndUpdateData() {
 
         String key = "fiction_";
@@ -177,7 +178,7 @@ public class FictionController extends BaseController {
      *
      * @return
      */
-    @RequestMapping("/getpiclist")
+    @RequestMapping(method = RequestMethod.POST, value = "/getpiclist")
     @ResponseBody
     public String getPicListFromRedis() {
 
@@ -191,7 +192,7 @@ public class FictionController extends BaseController {
      *
      * @return
      */
-    @RequestMapping("/getmongosensitivewords")
+    @RequestMapping(method = RequestMethod.POST, value = "/getmongosensitivewords")
     @ResponseBody
     public String getMongoSensitiveWords() {
         List<String> sensitiveWordsList = fictionService.getMongoSensitiveWordsFromRedis("fiction_sensitivewords");

@@ -30,7 +30,7 @@ import java.util.*;
  */
 
 @RestController
-@RequestMapping("/userfiction")
+@RequestMapping(method = RequestMethod.POST, value = "/userfiction")
 public class UserFictionController extends BaseController {
 
     protected static Logger logger = LoggerFactory.getLogger(UserFictionController.class);
@@ -50,7 +50,8 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getfictiondetaillist")
+    @RequestMapping(method = RequestMethod.POST, value = "/getfictiondetaillist")
+    @ResponseBody
     public String getFictionDetailList(HttpServletRequest request) {
 
         String fiction_ids = request.getParameter("fiction_ids");
@@ -101,7 +102,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getuserunreadfictionSet")
+    @RequestMapping(method = RequestMethod.POST, value = "/getuserunreadfictionSet")
     @ResponseBody
     public String getFictionListWithoutReaded(HttpServletRequest request) {
 
@@ -156,7 +157,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getfictiondetail")
+    @RequestMapping(method = RequestMethod.POST, value = "/getfictiondetail")
     @ResponseBody
     public String getFictionDetailByfictionIdAndPageNum(HttpServletRequest request) {
 
@@ -198,7 +199,7 @@ public class UserFictionController extends BaseController {
      * @param request
      */
 
-    @RequestMapping("/updateuserreadline")
+    @RequestMapping(method = RequestMethod.POST, value = "/updateuserreadline")
     public String getUserLatestFictionInfo(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
@@ -217,7 +218,7 @@ public class UserFictionController extends BaseController {
     /**
      * 小说阅读数+1
      */
-    @RequestMapping("/increadcount")
+    @RequestMapping(method = RequestMethod.POST, value = "/increadcount")
     @ResponseBody
     public String incFictionUserReadCount(HttpServletRequest request) {
 
@@ -250,7 +251,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getuserreadfictionlist")
+    @RequestMapping(method = RequestMethod.POST, value = "/getuserreadfictionlist")
     @ResponseBody
     public String getUserFictionList(HttpServletRequest request) {
 
@@ -302,7 +303,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getmyfictioncount")
+    @RequestMapping(method = RequestMethod.POST, value = "/getmyfictioncount")
     @ResponseBody
     public String getMyFictionCount(HttpServletRequest request) {
 
@@ -328,7 +329,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getmyfictionlist")
+    @RequestMapping(method = RequestMethod.POST, value = "/getmyfictionlist")
     @ResponseBody
     public String getMyFiction(HttpServletRequest request) {
 
@@ -365,7 +366,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getlastfictiondetail")
+    @RequestMapping(method = RequestMethod.POST, value = "/getlastfictiondetail")
     @ResponseBody
     public String getFictionEndDeatil(HttpServletRequest request) {
 
@@ -397,7 +398,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/getfictionpreviousinfo")
+    @RequestMapping(method = RequestMethod.POST, value = "/getfictionpreviousinfo")
     @ResponseBody
     public String getFictionPreviousDetail(HttpServletRequest request) {
 
@@ -422,7 +423,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/createfiction")
+    @RequestMapping(method = RequestMethod.POST, value = "/createfiction")
     @ResponseBody
     public String createFiction(HttpServletRequest request) {
 
@@ -464,7 +465,7 @@ public class UserFictionController extends BaseController {
      *
      * @param request
      */
-    @RequestMapping("/delmyfiction")
+    @RequestMapping(method = RequestMethod.POST, value = "/delmyfiction")
     @ResponseBody
     public String delFiction(HttpServletRequest request) {
 
@@ -493,7 +494,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/addonefictiondetail")
+    @RequestMapping(method = RequestMethod.POST, value = "/addonefictiondetail")
     @ResponseBody
     public String addOneFictionDetail(HttpServletRequest request) {
 
@@ -532,7 +533,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/updateonefictiondetail")
+    @RequestMapping(method = RequestMethod.POST, value = "/updateonefictiondetail")
     @ResponseBody
     public String updateOneFictionDetail(HttpServletRequest request) {
 
@@ -554,7 +555,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/delonefictiondetail")
+    @RequestMapping(method = RequestMethod.POST, value = "/delonefictiondetail")
     @ResponseBody
     public String delOneFictionDetail(HttpServletRequest request) {
 
@@ -576,7 +577,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/addactor")
+    @RequestMapping(method = RequestMethod.POST, value = "/addactor")
     @ResponseBody
     public String addActorintoFictionInfo(HttpServletRequest request) {
         String fiction_id = request.getParameter("fiction_id");
@@ -610,7 +611,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return 判断该角色是否参与过, 参与过则不能删除
      */
-    @RequestMapping("/delactor")
+    @RequestMapping(method = RequestMethod.POST, value = "/delactor")
     @ResponseBody
     public String delActorintoFictionInfo(HttpServletRequest request) {
         String fiction_id = request.getParameter("fiction_id");
@@ -635,7 +636,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("updateactor")
+    @RequestMapping(method = RequestMethod.POST, value = "updateactor")
     @ResponseBody
     public String updateActorintoFictionInfo(HttpServletRequest request) {
 
@@ -666,7 +667,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping("/releasefiction")
+    @RequestMapping(method = RequestMethod.POST, value = "/releasefiction")
     @ResponseBody
     public String releaseFiction(HttpServletRequest request) {
 
@@ -704,7 +705,7 @@ public class UserFictionController extends BaseController {
      *
      * @param request
      */
-    @RequestMapping("/updateredisfictiondetail")
+    @RequestMapping(method = RequestMethod.POST, value = "/updateredisfictiondetail")
     @ResponseBody
     public String updateFictionDetail(HttpServletRequest request) {
 
@@ -727,16 +728,16 @@ public class UserFictionController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST,value = "/useruploadpic")
+    @RequestMapping(method = RequestMethod.POST, value = "/useruploadpic")
     @ResponseBody
-    public String uploadFictionPic(HttpServletRequest request,@RequestParam("pic") MultipartFile[] files) {
+    public String uploadFictionPic(HttpServletRequest request, @RequestParam("pic") MultipartFile[] files) {
 
 //        MultipartResolver resolver = new CommonsMultipartResolver(request.getSession().getServletContext());
 //        MultipartHttpServletRequest multipartRequest = resolver.resolveMultipart(request);
 //        DefaultMultipartHttpServletRequest defaultMultipartHttpServletRequest = new DefaultMultipartHttpServletRequest(multipartRequest);
 //        MultiValueMap<String, MultipartFile> fileMap = defaultMultipartHttpServletRequest.getMultiFileMap();
 
-        MultipartFile file =files[0];//multipartRequest.getFile("pic");
+        MultipartFile file = files[0];//multipartRequest.getFile("pic");
 
         if (file.isEmpty()) {
             return returnJsonData(Constant.DataError, "", Constant.UploadPicError);

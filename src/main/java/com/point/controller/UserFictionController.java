@@ -370,20 +370,34 @@ public class UserFictionController extends BaseController {
     public String getFictionEndDeatil(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
-        long fiction_line_num = Long.parseLong(request.getParameter("fiction_line_num"));
+        // long fiction_line_num = Long.parseLong(request.getParameter("fiction_line_num"));
 
         long page_num = 20;
 
-        long start_fiction_page_num = (fiction_line_num / page_num) + 1;
+//        long start_fiction_page_num = (fiction_line_num / page_num) + 1;
+//
+//        long fiction_detail_num = (fiction_line_num / page_num) * page_num;
 
-        long fiction_detail_num = (fiction_line_num / page_num) * page_num;
+        List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionDeatil(fiction_id);//userFictionService.getFictionEndDeatil(fiction_id, fiction_detail_num);
 
-        List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionEndDeatil(fiction_id, fiction_detail_num);
+        double fiction_detail_num = Math.ceil(fictionDetailBeanList.size() / page_num);
+
+
+        int start_fiction_page_num = (int) ((fiction_detail_num - 1) * 20 + 1);
+
+
+        List<FictionDetailBean> fictionDetailBeanList1 = new ArrayList<>();
+
+        for (int i = start_fiction_page_num; i < fictionDetailBeanList.size(); i++) {
+
+            fictionDetailBeanList1.add(fictionDetailBeanList.get(i));
+
+        }
 
         Map<String, Object> map = new HashMap<String, Object>();
 
         map.put("fiction_page_num", start_fiction_page_num);
-        map.put("fiction_detail", fictionDetailBeanList);
+        map.put("fiction_detail", fictionDetailBeanList1);
 
         return returnJsonData(Constant.DataDefault, map, "");
     }
@@ -402,17 +416,31 @@ public class UserFictionController extends BaseController {
     public String getFictionPreviousDetail(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
-        long fiction_page_num = Long.parseLong(request.getParameter("fiction_page_num"));
+        int fiction_page_num = Integer.parseInt(request.getParameter("fiction_page_num"));
 
 
-        long page_num = 20;
+        int page_num = 20;
 
-        long start_fiction_detail_num = (fiction_page_num - 1) * page_num;
-        long end_fiction_detail_num = start_fiction_detail_num + page_num;
+        //   long start_fiction_detail_num = (fiction_page_num - 1) * page_num;
+        //   long end_fiction_detail_num = start_fiction_detail_num + page_num;
 
-        List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionPreviousDetailFromMongo(fiction_id, start_fiction_detail_num, end_fiction_detail_num);
+        List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionDeatil(fiction_id);//getFictionPreviousDetailFromMongo(fiction_id, start_fiction_detail_num, end_fiction_detail_num);
 
-        return returnJsonData(Constant.DataDefault, fictionDetailBeanList, "");
+        List<FictionDetailBean> fictionDetailBeanList1 = new ArrayList<>();
+        if (fiction_page_num > 0) {
+            int start_fiction_detail_num = ((fiction_page_num - 1) * page_num) + 1;
+            int end_fiction_detail_num = start_fiction_detail_num + page_num;
+
+            for (int i = start_fiction_detail_num; i < end_fiction_detail_num; i++) {
+
+                fictionDetailBeanList1.add(fictionDetailBeanList.get(i));
+
+            }
+
+        }
+
+
+        return returnJsonData(Constant.DataDefault, fictionDetailBeanList1, "");
 
     }
 
@@ -549,7 +577,7 @@ public class UserFictionController extends BaseController {
 
         if (updateStatus) {
 
-            userFictionService.updateFictionDateTime(fiction_id,request.getAttribute("timestamp").toString(),new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            userFictionService.updateFictionDateTime(fiction_id, request.getAttribute("timestamp").toString(), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 
             return returnJsonData(Constant.DataDefault, "", Constant.editOneLineFictionDetailSuccessed);
         } else {
@@ -712,6 +740,7 @@ public class UserFictionController extends BaseController {
      * fiction_status的状态必须是2(加入热门池)，才能调用此接口
      *
      * @param request
+     * @// TODO: 2017/9/11 0011 修改小说的每页页数
      */
     @RequestMapping(method = RequestMethod.POST, value = "/updateredisfictiondetail")
     @ResponseBody
@@ -763,9 +792,9 @@ public class UserFictionController extends BaseController {
 
             String temp = request.getParameter("temp");
 
-            if(null !=temp && temp.equals("update")){
+            if (null != temp && temp.equals("update")) {
                 String fiction_id = request.getParameter("fiction_id");
-                userFictionService.updateFictionPic(fiction_pic_path,fiction_id);
+                userFictionService.updateFictionPic(fiction_pic_path, fiction_id);
             }
 
             return returnJsonData(Constant.DataDefault, fiction_pic_path, "");

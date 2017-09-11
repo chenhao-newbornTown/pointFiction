@@ -76,5 +76,7 @@ public interface UserFictionService {
 
     void updateFictionDateTime(String fiction_id,String update_time,String update_date);
 
+    List<FictionDetailBean> getFictionDeatil(String fiction_id);
+
 
 }

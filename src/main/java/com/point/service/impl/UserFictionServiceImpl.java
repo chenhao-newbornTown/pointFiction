@@ -192,11 +192,19 @@ public class UserFictionServiceImpl implements UserFictionService {
      */
     public List<FictionDetailBean> getFictionEndDeatil(String fiction_id, long fiction_detail_num) {
 
-        List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_fiction_detail_index").gt(fiction_detail_num)), FictionDetailBean.class);
+        List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))
+                .and("actor_fiction_detail_index").gt(fiction_detail_num)), FictionDetailBean.class);
 
+        return fictionDetailBeanList;
+    }
+
+    public List<FictionDetailBean> getFictionDeatil(String fiction_id) {
+
+        List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), FictionDetailBean.class);
         return fictionDetailBeanList;
 
     }
+
 
 
     public List<FictionDetailBean> getFictionPreviousDetailFromMongo(String fiction_id, long start_fiction_detail_num, long end_fiction_detail_num) {

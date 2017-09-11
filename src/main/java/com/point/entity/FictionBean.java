@@ -36,7 +36,7 @@ public class FictionBean {
 
     private int fiction_status; //0，未发布，1，已发布，2加入推荐池子
 
-    private String status;//小说状态--->图片被删，小说被删，默认00000
+    private String status;//小说状态--->图片被删，小说被删，默认000000
 
     private String user_like_count_status;//0,未点赞，1，已点赞
 

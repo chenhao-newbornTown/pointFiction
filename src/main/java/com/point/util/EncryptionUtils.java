@@ -1,6 +1,9 @@
 package com.point.util;
 
 import com.point.constant.Constant;
+import com.point.service.impl.UserServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -19,6 +22,8 @@ import javax.crypto.spec.SecretKeySpec;
  * Created by 肥肥 on 2017/8/20 0020.
  */
 public class EncryptionUtils {
+
+    protected static Logger logger = LoggerFactory.getLogger(EncryptionUtils.class);
 
 
     /**
@@ -51,17 +56,17 @@ public class EncryptionUtils {
             byte[] result = cipher.doFinal(byteContent);
             return result; // 加密
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (BadPaddingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -92,15 +97,15 @@ public class EncryptionUtils {
             byte[] result = cipher.doFinal(content);
             return result; // 加密
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (BadPaddingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -167,6 +172,7 @@ public class EncryptionUtils {
             byte[] decryptResult = aesDecrypt(decryptFrom, Constant.EncryptKey);
             return new String(decryptResult).trim();
         } catch (Exception e) {
+            logger.error(e.getMessage(),e);
             return null;
         }
 

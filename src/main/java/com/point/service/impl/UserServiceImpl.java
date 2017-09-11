@@ -2,6 +2,7 @@ package com.point.service.impl;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.point.entity.FictionBean;
 import com.point.entity.UserInfoBean;
 import com.point.mongo.UserRepository;
 import com.point.redis.UserRedis;
@@ -179,6 +180,9 @@ public class UserServiceImpl implements UserService {
 
         try {
             mongoTemplate.upsert(new Query(Criteria.where("uid").is(Long.parseLong(uid))), Update.update("nick_name", nick_name), UserInfoBean.class);
+
+            mongoTemplate.updateMulti(new Query(Criteria.where("fiction_author_id").is(uid)), Update.update("fiction_author_name", nick_name), FictionBean.class);
+
             return true;
         }catch (Exception e){
             logger.error("updateUserNickName is error,uid={},nick_name={}", uid,nick_name);

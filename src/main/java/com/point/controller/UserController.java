@@ -243,6 +243,8 @@ public class UserController extends BaseController {
 
 
         String user_read_history_json = request.getParameter("user_read_history");
+        System.out.println(user_read_history_json);
+        logger.info("user_read_history_json",user_read_history_json);
 
         if (null != user_read_history_json) {
 

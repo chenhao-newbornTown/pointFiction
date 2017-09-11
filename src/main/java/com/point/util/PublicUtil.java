@@ -207,7 +207,9 @@ public class PublicUtil {
             FictionDetailBean fictionDetailBean = new FictionDetailBean();
 
             Row row = sheet.getRow(i);
+            row.getCell(0).setCellType(Cell.CELL_TYPE_STRING);
             String actor_name = row.getCell(0).getStringCellValue();
+            row.getCell(1).setCellType(Cell.CELL_TYPE_STRING);
             String actor_fiction_detail = row.getCell(1).getStringCellValue();
 
             if (!actor_name_list.contains(actor_name) && !actor_name.equals("旁白")) {
@@ -280,7 +282,9 @@ public class PublicUtil {
             FictionDetailBean fictionDetailBean = new FictionDetailBean();
 
             Row row = sheet.getRow(i);
+            row.getCell(0).setCellType(Cell.CELL_TYPE_STRING);
             String actor_name = row.getCell(0).getStringCellValue();
+            row.getCell(1).setCellType(Cell.CELL_TYPE_STRING);
             String actor_fiction_detail = row.getCell(1).getStringCellValue();
 
             if (!actor_name_list.contains(actor_name) && !actor_name.equals("旁白")) {

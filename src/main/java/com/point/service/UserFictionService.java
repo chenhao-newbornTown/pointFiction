@@ -72,5 +72,9 @@ public interface UserFictionService {
 
     String insertPic(PicBean picBean);
 
+    boolean updateFictionPic(String fiction_pic_path,String fiction_id);
+
+    void updateFictionDateTime(String fiction_id,String update_time,String update_date);
+
 
 }

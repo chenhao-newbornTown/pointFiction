@@ -13,6 +13,9 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * Created by hadoop on 2017-7-18.
@@ -35,17 +38,34 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 
                 request.setAttribute("timestamp", System.currentTimeMillis());
 
-//                System.out.println("getContextPath----------->" + request.getServletPath());
 
                 String queryString = request.getQueryString();
 
                 String ip = PublicUtil.getIpAddress(request);//String.valueOf(request.getAttribute("X-real-ip"));
 
-                if (StringUtils.isEmpty(queryString)) {
-                    logger.info(request.getMethod() + "-----ip----->" + ip + "----->" + request.getRequestURL().toString());
-                } else {
-                    logger.info(request.getMethod() + "-----ip----->" + ip + "----->" + request.getRequestURL().toString() + "?" + request.getQueryString());
+
+
+                request.setCharacterEncoding("utf-8");
+                response.setContentType("text/html;charset=utf-8");
+
+                String query = "";
+
+                Map<String, String[]> map = (Map<String, String[]>) request.getParameterMap();
+                for (String name : map.keySet()) {
+                    String[] values = map.get(name);
+                    query += (name + "=" + Arrays.toString(values))+"&";
                 }
+
+                query = query.replaceAll("\\[","").replaceAll("\\]","");
+
+                if (StringUtils.isEmpty(queryString)) {
+                    logger.info(request.getMethod() + "-----ip----->" + ip + "----" + String.valueOf(request.getAttribute("X-real-ip")) + "----->" + request.getRequestURL().toString() + "?"+query);
+                } else {
+                   // logger.info(request.getMethod() + "-----ip----->" + ip + "----" + String.valueOf(request.getAttribute("X-real-ip")) + "----->" + request.getRequestURL().toString() + "?" + request.getQueryString());
+                    logger.info(request.getMethod() + "-----ip----->" + ip + "----" + String.valueOf(request.getAttribute("X-real-ip")) + "----->" + request.getRequestURL().toString() + "?" + query);
+                }
+
+
 //                String method = request.getServletPath();
 
 

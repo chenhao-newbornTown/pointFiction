@@ -154,23 +154,19 @@ public class FictionController extends BaseController {
     /**
      * 更新所有的小说入redis
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/uploadredis")
+    @RequestMapping(method = RequestMethod.GET, value = "/uploadredis")
     public void flushRedisAndUpdateData() {
 
-        String key = "fiction_";
-
-        fictionService.deleteRedisBykey(key);
-
-        List<Long> fiction_id_List = fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
-
+        fictionService.deleteRedisBykey("fiction_idlist_all");
+        fictionService.deleteRedisBykey("fiction_info_all");
+        fictionService.deleteRedisBykey("fiction_info_deatil_");
+        fictionService.deleteRedisBykey("fiction_page_info_");
+        fictionService.deleteRedisBykey("fiction_sensitivewords");
+        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
         //小说具体内容存储到redis
-        fictionService.insertFictionListToRedis(key + "info_deatil_", "20", fiction_id_List);
-
-        fictionService.getMongoPicToRedis(key + "pics");
-
-        fictionService.getMongoSensitiveWordsToRedis(key + "sensitivewords");
-
-
+        fictionService.insertFictionListToRedis("fiction_info_deatil_", "20",fiction_id_List);
+        fictionService.getMongoSensitiveWordsToRedis("fiction_sensitivewords");
+        fictionService.setFictionInfoAll();
     }
 
     /**

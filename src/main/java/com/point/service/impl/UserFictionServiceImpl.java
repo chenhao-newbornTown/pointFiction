@@ -225,6 +225,14 @@ public class UserFictionServiceImpl implements UserFictionService {
         }
     }
 
+
+    public void updateFictionDateTime(String fiction_id,String update_time,String update_date){
+
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time",update_time).set("update_date",update_date),FictionBean.class);
+
+    }
+
+
     public boolean delOneFictionDetail(String id) {
 
         try {
@@ -410,6 +418,20 @@ public class UserFictionServiceImpl implements UserFictionService {
         String fiction_pic_path = picMongoBean.getPic_name();
 
         return fiction_pic_path;
+    }
+
+    public boolean updateFictionPic(String fiction_pic_path,String fiction_id){
+
+        try{
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))),Update.update("fiction_pic_path",fiction_pic_path).set("status","000000"),FictionBean.class);
+            return true;
+        }catch (Exception e){
+            logger.error("updateFictionPic is error,fiction_id={},fiction_pic_path{}",fiction_id,fiction_pic_path);
+            return false;
+        }
+
 
     }
+
+
 }

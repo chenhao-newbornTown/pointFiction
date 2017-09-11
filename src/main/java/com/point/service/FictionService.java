@@ -85,4 +85,6 @@ public interface FictionService {
 
     String getReadUserReadPageNum(String key, String user_read_line);
 
+    void setFictionInfoAll();
+
 }

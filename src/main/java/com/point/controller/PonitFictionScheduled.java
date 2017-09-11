@@ -21,20 +21,32 @@ public class PonitFictionScheduled {
     @Autowired
     FictionService fictionService;
 
-    @Scheduled(cron = "0 10 02 * * ?")
-    public void executePutDataToRedis(){
+    @Scheduled(cron = "0 10 2 * * ?")
+    public void executePutFictionDetailToRedis(){
 
-        String key = "fiction_";
-        fictionService.deleteRedisBykey(key);
+        fictionService.deleteRedisBykey("fiction_idlist_all");
+        fictionService.deleteRedisBykey("fiction_info_deatil_");
+        fictionService.deleteRedisBykey("fiction_page_info_");
+        fictionService.deleteRedisBykey("fiction_sensitivewords");
         List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
         //小说具体内容存储到redis
-        fictionService.insertFictionListToRedis(key + "info_deatil_", "20",fiction_id_List);
+        fictionService.insertFictionListToRedis("fiction_info_deatil_", "20",fiction_id_List);
 
-        fictionService.getMongoPicToRedis(key+"pics");
+       // fictionService.getMongoPicToRedis(key+"pics");
 
-        fictionService.getMongoSensitiveWordsToRedis(key+"sensitivewords");
+        fictionService.getMongoSensitiveWordsToRedis("fiction_sensitivewords");
 
-        logger.info("PonitFictionScheduled----->executePutDataToRedis is End !!!");
+        logger.info("PonitFictionScheduled----->executePutFictionDetailToRedis is End !!!");
     }
 
+    @Scheduled(cron = "0 */15 * * * ?")
+    public void executePutFictionInfoToRedis() {
+
+        fictionService.deleteRedisBykey("fiction_info_all");
+
+        fictionService.setFictionInfoAll();
+
+        logger.info("PonitFictionScheduled----->executePutFictionInfoToRedis is End !!!");
+
+    }
 }

@@ -120,7 +120,6 @@ public class UserFictionController extends BaseController {
 
             if (null != userReadMap) {
                 JsonMap.put("user_latest_read", userReadMap);
-
                 allFictionSet.remove(Long.parseLong(userReadMap.get("fiction_id").toString()));
             }
         }
@@ -520,6 +519,7 @@ public class UserFictionController extends BaseController {
             fictionService.incrFictionLineNum(fiction_id, 1);
             Map<String, String> map = new HashMap<String, String>();
             map.put("fiction_detail_id", id);
+
             return returnJsonData(Constant.DataDefault, map, Constant.addOneLineFictionDetailSuccessed);
         } else {
             return returnJsonData(Constant.DataError, "", Constant.addOneLineFictionDetailFailed);
@@ -539,10 +539,18 @@ public class UserFictionController extends BaseController {
 
         String id = request.getParameter("fiction_detail_id");
         String actor_fiction_detail = request.getParameter("actor_fiction_detail");
+        String fiction_id = request.getParameter("fiction_id");
+
+        if (StringUtils.isEmpty(fiction_id)) {
+            return returnJsonData(Constant.DataError, "", Constant.FictionIdsError);
+        }
 
         boolean updateStatus = userFictionService.updateOneFictionDetail(id, actor_fiction_detail);
 
         if (updateStatus) {
+
+            userFictionService.updateFictionDateTime(fiction_id,request.getAttribute("timestamp").toString(),new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+
             return returnJsonData(Constant.DataDefault, "", Constant.editOneLineFictionDetailSuccessed);
         } else {
             return returnJsonData(Constant.DataError, "", Constant.editOneLineFictionDetailFailed);
@@ -753,12 +761,15 @@ public class UserFictionController extends BaseController {
             picBean.setUid(Long.parseLong(uid));
             String fiction_pic_path = userFictionService.insertPic(picBean);
 
-            System.out.println(returnJsonData(Constant.DataDefault, fiction_pic_path, ""));
+            String temp = request.getParameter("temp");
+
+            if(null !=temp && temp.equals("update")){
+                String fiction_id = request.getParameter("fiction_id");
+                userFictionService.updateFictionPic(fiction_pic_path,fiction_id);
+            }
 
             return returnJsonData(Constant.DataDefault, fiction_pic_path, "");
         } else {
-
-            System.out.println(returnJsonData(Constant.DataError, "", Constant.UploadPicFailed));
             return returnJsonData(Constant.DataError, "", Constant.UploadPicFailed);
         }
     }

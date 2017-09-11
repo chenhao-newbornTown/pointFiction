@@ -104,11 +104,16 @@ public class FictionRedis extends BaseRedis {
     }
 
     public void insertAllFictionIdSetToRedis(String key, List<Long> fiction_id_List, Map<String, FictionBean> fictionid_Maps) {
-        redisTemplate.opsForSet().add(key, new Gson().toJson(fiction_id_List));
 
-        for (Map.Entry<String, FictionBean> fictionBeanEntry : fictionid_Maps.entrySet()) {
+        if(null!=key && null !=fiction_id_List){
+            redisTemplate.opsForSet().add(key, new Gson().toJson(fiction_id_List));
+        }
 
-            redisTemplate.opsForHash().put("fiction_info_all", fictionBeanEntry.getKey(), new Gson().toJson(fictionBeanEntry.getValue()));
+        if(null !=fictionid_Maps){
+            for (Map.Entry<String, FictionBean> fictionBeanEntry : fictionid_Maps.entrySet()) {
+
+                redisTemplate.opsForHash().put("fiction_info_all", fictionBeanEntry.getKey(), new Gson().toJson(fictionBeanEntry.getValue()));
+            }
         }
     }
 
@@ -138,15 +143,15 @@ public class FictionRedis extends BaseRedis {
         return fictionInfo;
     }
 
-    public void incReadCount(String fiction_id) {
+    public void incReadCount(String fiction_id,long read_count_int) {
 
-        redisTemplate.opsForValue().increment("readcount_" + fiction_id, 1L);
+        redisTemplate.opsForValue().increment("readcount_" + fiction_id, read_count_int);
 
     }
 
-    public void incLikeCount(String fiction_id) {
+    public void incLikeCount(String fiction_id,long like_count_int) {
 
-        redisTemplate.opsForValue().increment("likecount_" + fiction_id, 1L);
+        redisTemplate.opsForValue().increment("likecount_" + fiction_id, like_count_int);
     }
 
     public long getLikeCount(String fiction_id) {

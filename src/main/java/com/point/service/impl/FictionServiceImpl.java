@@ -131,20 +131,35 @@ public class FictionServiceImpl implements FictionService {
 
         List<Long> fiction_id_List = new ArrayList<Long>();
 
-        Map<String, FictionBean> fictionid_Maps = new HashMap<String, FictionBean>();
 
         for (FictionBean fictionBean : fictionBeanList) {
 
             fiction_id_List.add(fictionBean.getFiction_id());
 
-            fictionid_Maps.put(String.valueOf(fictionBean.getFiction_id()), fictionBean);
         }
 
-
-        fictionRedis.insertAllFictionIdSetToRedis(key, fiction_id_List, fictionid_Maps);
+        fictionRedis.insertAllFictionIdSetToRedis(key, fiction_id_List, null);
 
         return fiction_id_List;
     }
+
+    public void setFictionInfoAll(){
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_status").is(2)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
+
+        Map<String, FictionBean> fictionid_Maps = new HashMap<String, FictionBean>();
+
+        for (FictionBean fictionBean : fictionBeanList) {
+
+            fictionid_Maps.put(String.valueOf(fictionBean.getFiction_id()), fictionBean);
+        }
+
+        fictionRedis.insertAllFictionIdSetToRedis(null, null, fictionid_Maps);
+
+
+
+    }
+
+
 
     public void updateAllFictionIdListToRedis(String key) {
         List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_status").is(2)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
@@ -168,17 +183,22 @@ public class FictionServiceImpl implements FictionService {
 
     @Override
     public void updateFictionUserReadCount(String fiction_id) {
-        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("read_count", 1), FictionBean.class);
 
-        fictionRedis.incReadCount(fiction_id);
+        long read_count_int = new Random().nextInt(5);
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("read_count", read_count_int), FictionBean.class);
+
+        fictionRedis.incReadCount(fiction_id,read_count_int);
 
 
     }
 
     public void updateFictionUserLikeCount(String fiction_id) {
-        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("like_count", 1), FictionBean.class);
 
-        fictionRedis.incLikeCount(fiction_id);
+        long like_count_int = new Random(5).nextInt(5);
+
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("like_count", like_count_int), FictionBean.class);
+
+        fictionRedis.incLikeCount(fiction_id,like_count_int);
 
     }
 
@@ -298,10 +318,10 @@ public class FictionServiceImpl implements FictionService {
     public void incrFictionLineNum(String fiction_id, int i) {
         try {
 
-            if(i>0){
-                mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_original_num", i).inc("fiction_line_num",1), FictionBean.class);
-            }else{
-                mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_original_num", i), FictionBean.class);
+            if (i > 0) {
+                mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_original_num", i).inc("fiction_line_num", 1).set("update_time",String.valueOf(System.currentTimeMillis())).set("update_date",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
+            } else {
+                mongoTemplate.upsert(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), new Update().inc("fiction_original_num", i).set("update_time",String.valueOf(System.currentTimeMillis())).set("update_date",new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())), FictionBean.class);
             }
 
 
@@ -336,7 +356,11 @@ public class FictionServiceImpl implements FictionService {
 
         SensitiveWordsBean sensitiveWordsBean = mongoTemplate.findOne(new BasicQuery(new BasicDBObject(), fields), SensitiveWordsBean.class);
 
-        fictionRedis.insertSensitiveWordsToRedis(key, sensitiveWordsBean.getWords());
+        if (null != sensitiveWordsBean) {
+            fictionRedis.insertSensitiveWordsToRedis(key, sensitiveWordsBean.getWords());
+        }
+
+
     }
 
     public List<String> getMongoSensitiveWordsFromRedis(String key) {

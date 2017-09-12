@@ -8,6 +8,7 @@ import com.point.service.FictionService;
 import com.point.service.UserFictionService;
 import com.point.service.UserService;
 import com.point.util.PublicUtil;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.HTTP;
 import org.slf4j.Logger;
@@ -263,7 +264,7 @@ public class UserFictionController extends BaseController {
         List<UserFictionBean> userFictionBeanList = userFictionService.getUserFictionList(uid);
 
         if (null == userFictionBeanList || userFictionBeanList.size() <= 0) {
-            return returnJsonData(Constant.DataDefault, "", "");
+            return returnJsonData(Constant.DataDefault, ArrayUtils.EMPTY_STRING_ARRAY, "");
         }
 
         List<FictionBean> fictionBeanList = fictionService.getFictionInfoByFictionidFromMongo(userFictionBeanList);

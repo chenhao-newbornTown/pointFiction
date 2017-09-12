@@ -24,16 +24,16 @@ public class PonitFictionScheduled {
     @Scheduled(cron = "0 10 2 * * ?")
     public void executePutFictionDetailToRedis(){
 
-        fictionService.deleteRedisBykey("fiction_idlist_all");
-        fictionService.deleteRedisBykey("fiction_info_deatil_");
-        fictionService.deleteRedisBykey("fiction_page_info_");
-        fictionService.deleteRedisBykey("fiction_sensitivewords");
-        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
-        //小说具体内容存储到redis
-        fictionService.insertFictionListToRedis("fiction_info_deatil_", "20",fiction_id_List);
+//        fictionService.deleteRedisBykey("fiction_idlist_all");
+//        fictionService.deleteRedisBykey("fiction_info_deatil_");
+//        fictionService.deleteRedisBykey("fiction_page_info_");
+//        fictionService.deleteRedisBykey("fiction_sensitivewords");
+//        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
+//        //小说具体内容存储到redis
+//        fictionService.insertFictionListToRedis("fiction_info_deatil_", "20",fiction_id_List);
 
        // fictionService.getMongoPicToRedis(key+"pics");
-
+        fictionService.deleteRedisBykey("fiction_sensitivewords");
         fictionService.getMongoSensitiveWordsToRedis("fiction_sensitivewords");
 
         logger.info("PonitFictionScheduled----->executePutFictionDetailToRedis is End !!!");
@@ -45,6 +45,12 @@ public class PonitFictionScheduled {
         fictionService.deleteRedisBykey("fiction_info_all");
 
         fictionService.setFictionInfoAll();
+        fictionService.deleteRedisBykey("fiction_idlist_all");
+        fictionService.deleteRedisBykey("fiction_info_deatil_");
+        fictionService.deleteRedisBykey("fiction_page_info_");
+        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
+        //小说具体内容存储到redis
+        fictionService.insertFictionListToRedis("fiction_info_deatil_", "20",fiction_id_List);
 
         logger.info("PonitFictionScheduled----->executePutFictionInfoToRedis is End !!!");
 

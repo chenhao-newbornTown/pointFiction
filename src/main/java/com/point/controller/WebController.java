@@ -95,7 +95,7 @@ public class WebController {
         ModelAndView modelAndView = new ModelAndView("getHotFictionList");
         modelAndView.addObject("fictionBeanList", fictionBeanList);
         modelAndView.addObject("baseurl", BaseUrl);
-        modelAndView.addObject("uid", 888888);
+        modelAndView.addObject("uid", "888888");
         modelAndView.addObject("fictionBeanListSize",fictionBeanList.size());
         return modelAndView;
     }
@@ -303,6 +303,9 @@ public class WebController {
                         picBean.setUid(Long.parseLong("888888"));
                         PicBean picMongoBean = picRepostitory.insert(picBean);
                         fiction_pic_path = picMongoBean.getPic_name();
+
+                        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("fiction_pic_path", fiction_pic_path), FictionBean.class);
+
                     }
                 } else {
                     if (null == fiction_pic_path && !filetype.equals("xlsx")) {

@@ -193,15 +193,15 @@
                                    ,'<c:out value="${fb.fiction_name}"/>');">编辑信息</a>&nbsp;&nbsp;
                         <br>
                     </c:if>
-                    <c:if test="${fb.fiction_status==0}">
-                        <a style="text-decoration: none;" href="#"
-                           onclick="delFiction('<c:out value="${fb.id}"/>','<c:out value="${fb.fiction_id}"/>','<c:out
-                                   value="${fb.fiction_pic_path}"/>','fiction','<c:out value="${uid}"/>','<c:out
-                                   value="${fb.fiction_author_id}"/>');">删除小说</a>&nbsp;&nbsp;
-                        <br>
-                    </c:if>
+                    <%--<c:if test="${fb.fiction_status==0}">--%>
+                        <%--<a style="text-decoration: none;" href="#"--%>
+                           <%--onclick="delFiction('<c:out value="${fb.id}"/>','<c:out value="${fb.fiction_id}"/>','<c:out--%>
+                                   <%--value="${fb.fiction_pic_path}"/>','fiction','<c:out value="${uid}"/>','<c:out--%>
+                                   <%--value="${fb.fiction_author_id}"/>');">删除小说</a>&nbsp;&nbsp;--%>
+                        <%--<br>--%>
+                    <%--</c:if>--%>
 
-                    <c:if test="${fb.fiction_status==1}">
+                    <c:if test="${fb.fiction_status==1||fb.fiction_status==0}">
 
                         <a style="text-decoration: none;" href="#"
                            onclick="delFiction('<c:out value="${fb.id}"/>','<c:out value="${fb.fiction_id}"/>','<c:out

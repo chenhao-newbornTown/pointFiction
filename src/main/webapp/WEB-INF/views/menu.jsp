@@ -40,7 +40,7 @@
 						<ul class="jmenumenu">
 							<li class="submenu" onclick="addPanel('热门故事管理','<c:out value='${contextPath}'/>/hotfictionlist')"><a target="mainFrame">热门故事管理</a></li>
 							<li class="submenu" onclick="addPanel('新建/编辑 故事','<c:out value='${contextPath}'/>/editfictionall')"><a target="mainFrame">新建/编辑 故事</a></li>
-							<li class="submenu" onclick="addPanel('封面图片管理','<c:out value='${contextPath}'/>/uploadpic')"><a target="mainFrame">封面图片管理</a></li>
+							<%--<li class="submenu" onclick="addPanel('封面图片管理','<c:out value='${contextPath}'/>/uploadpic')"><a target="mainFrame">封面图片管理</a></li>--%>
                             <li class="submenu" onclick="addPanel('敏感词上传','<c:out value='${contextPath}'/>/getwords')"><a target="mainFrame">敏感词上传</a></li>
 						</ul>
 					</li>

@@ -21,10 +21,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by hadoop on 2017-7-18.
@@ -76,7 +73,7 @@ public class UserFictionServiceImpl implements UserFictionService {
 
         try {
             mongoTemplate.upsert(new Query(Criteria.where("uid").is(userFictionBean.getUid()).and("fiction_id").is(userFictionBean.getFiction_id()).and("fiction_name").is(userFictionBean.getFiction_name())),
-                    Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()).set("user_read_line",userFictionBean.getUser_read_line()).set("user_like_count",userFictionBean.getUser_like_count()), userFictionBean.getClass());
+                    Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()).set("user_read_line", userFictionBean.getUser_read_line()).set("user_like_count", userFictionBean.getUser_like_count()), userFictionBean.getClass());
 
             //  String key = "user_read_list_" + userFictionBean.getUid();
             // userFictionRedis.removeUserFictionByUid(key);
@@ -206,7 +203,6 @@ public class UserFictionServiceImpl implements UserFictionService {
     }
 
 
-
     public List<FictionDetailBean> getFictionPreviousDetailFromMongo(String fiction_id, long start_fiction_detail_num, long end_fiction_detail_num) {
 
         List<FictionDetailBean> fictionDetailBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("actor_fiction_detail_index").gt(start_fiction_detail_num).lte(end_fiction_detail_num)).with(new Sort(new Sort.Order(Sort.Direction.ASC, "actor_fiction_detail_index"))), FictionDetailBean.class);
@@ -234,9 +230,9 @@ public class UserFictionServiceImpl implements UserFictionService {
     }
 
 
-    public void updateFictionDateTime(String fiction_id,String update_time,String update_date){
+    public void updateFictionDateTime(String fiction_id, String update_time, String update_date) {
 
-        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time",update_time).set("update_date",update_date),FictionBean.class);
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("update_time", update_time).set("update_date", update_date), FictionBean.class);
 
     }
 
@@ -346,7 +342,7 @@ public class UserFictionServiceImpl implements UserFictionService {
 
         List<UserFictionBean> userFictionBeanList = mongoTemplate.find(new Query(Criteria.where("uid").is(Long.parseLong(uid))).with(new Sort(new Sort.Order(Sort.Direction.DESC, "user_read_timestamp"))), UserFictionBean.class);
 
-        if (null == userFictionBeanList || userFictionBeanList.size()<=0) {
+        if (null == userFictionBeanList || userFictionBeanList.size() <= 0) {
             return map;
         } else {
             map = new HashMap<String, Object>();
@@ -358,7 +354,57 @@ public class UserFictionServiceImpl implements UserFictionService {
     }
 
 
-    public long getUserReadFictionPageNumInfo(String uid,String fiction_id) {
+    public Map<String, Object> getUserLastestFictionInfo(String uid, Long fiction_id) {
+
+        DBObject queryObject = new BasicDBObject();
+        queryObject.put("uid", Long.parseLong(uid));
+        queryObject.put("fiction_id", fiction_id);
+
+        DBObject fields = new BasicDBObject();
+        fields.put("_id", false);
+        fields.put("user_read_line", true);
+
+        UserFictionBean userFictionBean = mongoTemplate.findOne(new BasicQuery(queryObject, fields), UserFictionBean.class);
+        Map<String, Object> map = null;
+        if (null == userFictionBean) {
+            return map;
+        } else {
+            map = new HashMap<String, Object>();
+            map.put("fiction_id", fiction_id);
+            map.put("user_read_line", userFictionBean.getUser_read_line());
+
+            return map;
+        }
+
+
+    }
+
+
+    public List<Long> getUserReadFictionids(String uid) {
+
+        DBObject queryObject = new BasicDBObject();
+        queryObject.put("uid", Long.parseLong(uid));
+
+        DBObject fields = new BasicDBObject();
+        fields.put("_id", false);
+        fields.put("fiction_id", true);
+
+        List<Long> fictionidList = new ArrayList<Long>();
+
+        List<UserFictionBean> userFictionBeanList = mongoTemplate.find(new BasicQuery(queryObject, fields).with(new Sort(new Sort.Order(Sort.Direction.DESC, "user_read_timestamp"))), UserFictionBean.class);
+
+        if (null != userFictionBeanList && userFictionBeanList.size() > 0) {
+            for (int i = 0; i < userFictionBeanList.size(); i++) {
+                fictionidList.add(userFictionBeanList.get(i).getFiction_id());
+            }
+        }
+
+        return fictionidList;
+
+    }
+
+
+    public long getUserReadFictionPageNumInfo(String uid, String fiction_id) {
 
         DBObject queryObject = new BasicDBObject();
         queryObject.put("uid", Long.parseLong(uid));
@@ -370,57 +416,57 @@ public class UserFictionServiceImpl implements UserFictionService {
 
         UserFictionBean userFictionBean = mongoTemplate.findOne(new BasicQuery(queryObject, fields), UserFictionBean.class);
 
-        if(null == userFictionBean){
+        if (null == userFictionBean) {
             return 1L;
-        }else {
+        } else {
             return userFictionBean.getUser_read_line();
         }
     }
 
     public void updateUserLatestFictionInfo(String fiction_id, String uid, long user_read_line) {
 
-        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("uid").is(Long.parseLong(uid))),Update.update("user_read_line",user_read_line),UserFictionBean.class);
+        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id)).and("uid").is(Long.parseLong(uid))), Update.update("user_read_line", user_read_line), UserFictionBean.class);
     }
 
-    public long getuserLatestFictionLine(String uid,long fiction_id){
+    public long getuserLatestFictionLine(String uid, long fiction_id) {
 
         UserFictionBean userFictionBean = mongoTemplate.find(new Query(Criteria.where("uid").is(Long.parseLong(uid)).and("fiction_id").is(fiction_id)), UserFictionBean.class).get(0);
 
-        if(null == userFictionBean){
+        if (null == userFictionBean) {
             return 0L;
-        }else {
+        } else {
             return userFictionBean.getUser_read_line();
         }
 
     }
 
-    public List<FictionActorBean> getFictionActorListByFictionid(long fiction_id){
+    public List<FictionActorBean> getFictionActorListByFictionid(long fiction_id) {
 
-        List<FictionActorBean> fictionActorBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(fiction_id)),FictionActorBean.class);
+        List<FictionActorBean> fictionActorBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_id").is(fiction_id)), FictionActorBean.class);
 
 
-        if(null !=fictionActorBeanList && fictionActorBeanList.size()>0){
+        if (null != fictionActorBeanList && fictionActorBeanList.size() > 0) {
 
             return fictionActorBeanList;
 
-        }else {
+        } else {
             return null;
         }
     }
 
 
-    public void saveUserWithOutLoginReadFictionInfo(List<UserFictionBean> userFictionBeanList){
+    public void saveUserWithOutLoginReadFictionInfo(List<UserFictionBean> userFictionBeanList) {
 
         for (UserFictionBean userFictionBean : userFictionBeanList) {
 
             mongoTemplate.upsert(new Query(Criteria.where("uid").is(userFictionBean.getUid()).and("fiction_id").is(userFictionBean.getFiction_id()).and("fiction_name").is(userFictionBean.getFiction_name())),
-                    Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()).set("user_read_line",userFictionBean.getUser_read_line()).set("user_like_count",userFictionBean.getUser_like_count()), userFictionBean.getClass());
+                    Update.update("user_read_timestamp", userFictionBean.getUser_read_timestamp()).set("user_read_line", userFictionBean.getUser_read_line()).set("user_like_count", userFictionBean.getUser_like_count()), userFictionBean.getClass());
         }
 
     }
 
 
-    public String insertPic(PicBean picBean){
+    public String insertPic(PicBean picBean) {
 
         PicBean picMongoBean = picRepostitory.insert(picBean);
         String fiction_pic_path = picMongoBean.getPic_name();
@@ -428,13 +474,13 @@ public class UserFictionServiceImpl implements UserFictionService {
         return fiction_pic_path;
     }
 
-    public boolean updateFictionPic(String fiction_pic_path,String fiction_id){
+    public boolean updateFictionPic(String fiction_pic_path, String fiction_id) {
 
-        try{
-            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))),Update.update("fiction_pic_path",fiction_pic_path).set("status","000000"),FictionBean.class);
+        try {
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(Long.parseLong(fiction_id))), Update.update("fiction_pic_path", fiction_pic_path).set("status", "000000"), FictionBean.class);
             return true;
-        }catch (Exception e){
-            logger.error("updateFictionPic is error,fiction_id={},fiction_pic_path{}",fiction_id,fiction_pic_path);
+        } catch (Exception e) {
+            logger.error("updateFictionPic is error,fiction_id={},fiction_pic_path{}", fiction_id, fiction_pic_path);
             return false;
         }
 

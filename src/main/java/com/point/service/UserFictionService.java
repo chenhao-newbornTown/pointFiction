@@ -4,6 +4,7 @@ import com.point.entity.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by hadoop on 2017-7-18.
@@ -62,21 +63,25 @@ public interface UserFictionService {
 
     void updateUserLatestFictionInfo(String fiction_id, String uid, long user_read_line);
 
-    long getuserLatestFictionLine(String uid,long fiction_id);
+    long getuserLatestFictionLine(String uid, long fiction_id);
 
     List<FictionActorBean> getFictionActorListByFictionid(long fiction_id);
 
     void saveUserWithOutLoginReadFictionInfo(List<UserFictionBean> userFictionBeanList);
 
-    long getUserReadFictionPageNumInfo(String uid,String fiction_id);
+    long getUserReadFictionPageNumInfo(String uid, String fiction_id);
 
     String insertPic(PicBean picBean);
 
-    boolean updateFictionPic(String fiction_pic_path,String fiction_id);
+    boolean updateFictionPic(String fiction_pic_path, String fiction_id);
 
-    void updateFictionDateTime(String fiction_id,String update_time,String update_date);
+    void updateFictionDateTime(String fiction_id, String update_time, String update_date);
 
     List<FictionDetailBean> getFictionDeatil(String fiction_id);
+
+    List<Long> getUserReadFictionids(String uid);
+
+    Map<String, Object> getUserLastestFictionInfo(String uid, Long fiction_id);
 
 
 }

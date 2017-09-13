@@ -8,6 +8,8 @@ import com.point.service.FictionService;
 import com.point.service.UserFictionService;
 import com.point.service.UserService;
 import com.point.util.PublicUtil;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.HTTP;
@@ -103,7 +105,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/getuserunreadfictionSet")
+    @RequestMapping(method = RequestMethod.GET, value = "/getuserunreadfictionSet")
     @ResponseBody
     public String getFictionListWithoutReaded(HttpServletRequest request) {
 
@@ -113,7 +115,58 @@ public class UserFictionController extends BaseController {
 
         List<Long> allFictionSet = fictionService.getAllFictionIdListFromReidsByKey("fiction_idlist_all");
 
+        List<Long> list = new ArrayList<Long>();
+
+        List<Long> redisFictionSet = new ArrayList<Long>();
+        redisFictionSet.addAll(allFictionSet);
+
         Map<String, Object> JsonMap = new HashMap<String, Object>();
+
+        if (StringUtils.isNotEmpty(uid)) {
+
+            List<Long> userReadFictionids = userFictionService.getUserReadFictionids(uid);
+
+            if (userReadFictionids.size() > 0) {
+
+                Long userLastestFictionid = userReadFictionids.get(0);
+
+                allFictionSet.retainAll(userReadFictionids);
+
+                List<Long> retainAllList = new ArrayList<Long>();
+
+                retainAllList.addAll(allFictionSet);//redis和已经读过的交集
+
+                List<Long> removeAllList = new ArrayList<Long>();
+
+                redisFictionSet.removeAll(retainAllList);
+
+                removeAllList.addAll(redisFictionSet);//redis中存在，但是用户没有读取过的小说
+
+
+//                if(removeAllList.contains(userLastestFictionid)){
+//                    removeAllList.remove(userLastestFictionid);
+
+                Map<String, Object> userReadMap = userFictionService.getUserLastestFictionInfo(uid, userLastestFictionid);
+
+                JsonMap.put("user_latest_read", userReadMap);
+
+//                }
+
+                list.addAll(removeAllList);
+                list.addAll(retainAllList);
+                JsonMap.put("fiction_list", list);
+            } else {
+                JsonMap.put("fiction_list", allFictionSet);
+            }
+
+        } else {
+            JsonMap.put("fiction_list", allFictionSet);
+        }
+
+
+
+
+     /*   Map<String, Object> JsonMap = new HashMap<String, Object>();
 
 
         if (StringUtils.isNotEmpty(uid)) {
@@ -127,7 +180,7 @@ public class UserFictionController extends BaseController {
 
         JsonMap.put("fiction_list", allFictionSet);
 
-        return returnJsonData(Constant.DataDefault, JsonMap, "");
+        return returnJsonData(Constant.DataDefault, JsonMap, "");*/
 
        /* List<Long> userUnread = new ArrayList<Long>();//用户未读小说的fictionSet
 
@@ -148,7 +201,39 @@ public class UserFictionController extends BaseController {
         }
 
         return returnJsonData(Constant.DataDefault, userUnread, "");*/
+
+        return returnJsonData(Constant.DataDefault, JsonMap, "");
     }
+
+
+    public static void main(String[] args) {
+
+
+        Set<Long> a = new HashSet<>();
+        Set<Long> b = new HashSet<>();
+
+
+        for (int i = 0; i < 10; i++) {
+            a.add(new Long(i));
+        }
+
+        for (int i = 8; i < 16; i++) {
+            b.add(new Long(i));
+        }
+
+        System.out.println(a);
+        System.out.println(b);
+
+        Set<Long> c = new HashSet<>();
+
+        a.retainAll(b);
+        System.out.println(a);
+        c.addAll(a);
+
+        System.out.println(c);
+
+    }
+
 
     /**
      * 返回小说的某一页

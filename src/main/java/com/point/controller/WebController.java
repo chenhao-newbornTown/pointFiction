@@ -89,7 +89,7 @@ public class WebController {
     @RequestMapping("/hotfictionlist")
     public ModelAndView getHotFictionList() {
 
-        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query().with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("status").ne(Constant.FictionStatusDeatilError)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
         //List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("status").ne(Constant.FictionStatusDeatilError)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
         ModelAndView modelAndView = new ModelAndView("getHotFictionList");
@@ -125,7 +125,8 @@ public class WebController {
             queryObject.put("fiction_status", fiction_status);
         }
 
-        //   queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
+
+        queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
 
         List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
@@ -133,6 +134,7 @@ public class WebController {
         modelAndView.addObject("fictionBeanList", fictionBeanList);
         modelAndView.addObject("fictionBean", fictionBean);
         modelAndView.addObject("baseurl", BaseUrl);
+        modelAndView.addObject("uid", "888888");
         modelAndView.addObject("fictionBeanListSize",request.getParameter("fictionBeanListSize"));
         return modelAndView;
     }
@@ -388,7 +390,7 @@ public class WebController {
             queryObject.put("fiction_status", fiction_status);
         }
 
-        //  queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
+        queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
         List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
         ModelAndView modelAndView = new ModelAndView("getHotFictionList");

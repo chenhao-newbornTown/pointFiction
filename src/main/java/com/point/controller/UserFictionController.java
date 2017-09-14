@@ -90,7 +90,13 @@ public class UserFictionController extends BaseController {
 
             if (null != fictionBean && !StringUtils.isEmpty(uid)) {
                 fictionBean.setUser_like_count_status(fictionService.getUserLikeCountStatus(uid, fiction_id));
-                fictionBean.setUser_read_line(userFictionService.getUserReadFictionPageNumInfo(uid, fiction_id));
+
+                long user_read_line = userFictionService.getUserReadFictionPageNumInfo(uid, fiction_id);
+                long fiction_line_num = fictionBean.getFiction_line_num();
+
+                user_read_line = user_read_line<=fiction_line_num?user_read_line:fiction_line_num;
+
+                fictionBean.setUser_read_line(user_read_line);
             }
 
             fictionBeanList.add(fictionBean);

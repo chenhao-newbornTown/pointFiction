@@ -391,7 +391,7 @@ public class FictionServiceImpl implements FictionService {
 
         TreeSet<Long> page_list = fictionRedis.getFictionPageInfo(key);
 
-        int i = 1;
+        int i = 0;
 
         if (page_list.size() > 0) {
             for (Long page_info_num : page_list) {

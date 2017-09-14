@@ -168,12 +168,13 @@ public class WebController {
         if (fiction_status < 999) {
             queryObject.put("fiction_status", fiction_status);
         }
-
+        queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
         List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
         ModelAndView modelAndView = new ModelAndView("getHotFictionList");
         modelAndView.addObject("fictionBeanList", fictionBeanList);
         modelAndView.addObject("fictionBean", fictionBean);
+        modelAndView.addObject("uid", "888888");
         modelAndView.addObject("baseurl", BaseUrl);
         return modelAndView;
     }
@@ -396,6 +397,7 @@ public class WebController {
         ModelAndView modelAndView = new ModelAndView("getHotFictionList");
         modelAndView.addObject("fictionBeanList", fictionBeanList);
         modelAndView.addObject("fictionBean", fictionBean);
+        modelAndView.addObject("uid", "888888");
         modelAndView.addObject("baseurl", BaseUrl);
         return modelAndView;
     }

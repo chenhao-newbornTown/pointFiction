@@ -105,7 +105,7 @@ public class UserFictionController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/getuserunreadfictionSet")
+    @RequestMapping(method = RequestMethod.POST, value = "/getuserunreadfictionSet")
     @ResponseBody
     public String getFictionListWithoutReaded(HttpServletRequest request) {
 
@@ -152,6 +152,7 @@ public class UserFictionController extends BaseController {
 
 //                }
 
+                retainAllList.remove(userLastestFictionid);
                 list.addAll(removeAllList);
                 list.addAll(retainAllList);
                 JsonMap.put("fiction_list", list);
@@ -203,35 +204,6 @@ public class UserFictionController extends BaseController {
         return returnJsonData(Constant.DataDefault, userUnread, "");*/
 
         return returnJsonData(Constant.DataDefault, JsonMap, "");
-    }
-
-
-    public static void main(String[] args) {
-
-
-        Set<Long> a = new HashSet<>();
-        Set<Long> b = new HashSet<>();
-
-
-        for (int i = 0; i < 10; i++) {
-            a.add(new Long(i));
-        }
-
-        for (int i = 8; i < 16; i++) {
-            b.add(new Long(i));
-        }
-
-        System.out.println(a);
-        System.out.println(b);
-
-        Set<Long> c = new HashSet<>();
-
-        a.retainAll(b);
-        System.out.println(a);
-        c.addAll(a);
-
-        System.out.println(c);
-
     }
 
 
@@ -466,7 +438,7 @@ public class UserFictionController extends BaseController {
 
         List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionDeatil(fiction_id);//userFictionService.getFictionEndDeatil(fiction_id, fiction_detail_num);
 
-        double fiction_detail_num = Math.ceil(fictionDetailBeanList.size() / page_num);
+        long fiction_detail_num = (long)Math.ceil(((double)fictionDetailBeanList.size()) / page_num);
 
 
         int start_fiction_page_num = (int) ((fiction_detail_num - 1) * 20 + 1);
@@ -487,6 +459,7 @@ public class UserFictionController extends BaseController {
 
         return returnJsonData(Constant.DataDefault, map, "");
     }
+
 
 
     /**

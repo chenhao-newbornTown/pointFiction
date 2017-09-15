@@ -449,6 +449,7 @@ public class UserFictionController extends BaseController {
 
         int start_fiction_page_num = (int) ((fiction_detail_num - 1) * 20 + 1);
 
+        start_fiction_page_num = start_fiction_page_num<=0?1:start_fiction_page_num;
 
         List<FictionDetailBean> fictionDetailBeanList1 = new ArrayList<>();
 

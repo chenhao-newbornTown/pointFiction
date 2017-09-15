@@ -396,14 +396,18 @@ public class FictionServiceImpl implements FictionService {
         if (page_list.size() > 0) {
             for (Long page_info_num : page_list) {
 
-                if (Long.parseLong(user_read_line) < page_info_num) {
+                if (Long.parseLong(user_read_line) <= page_info_num) {
                     break;
                 }
 
                 i++;
-
             }
         }
-        return String.valueOf(i);
+
+        int page_num = i+1;
+
+        page_num = page_num>page_list.size()?page_list.size():page_num;
+
+        return String.valueOf(page_num);
     }
 }

@@ -83,5 +83,12 @@ public interface UserFictionService {
 
     Map<String, Object> getUserLastestFictionInfo(String uid, Long fiction_id);
 
+    void insertDataForPush(String fiction_id, Long user_read_line, String device_token,String mobile_device_num);
+
+    List<PushInfo> getpushInfo();
+
+    void updateDataForPush(String mobile_device_num, long user_read_line, long fiction_id,int push_num);
+
+    void updatePushNum(String mobile_device_num);
 
 }

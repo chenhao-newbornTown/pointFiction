@@ -172,7 +172,7 @@ public class EncryptionUtils {
             byte[] decryptResult = aesDecrypt(decryptFrom, Constant.EncryptKey);
             return new String(decryptResult).trim();
         } catch (Exception e) {
-            logger.error(e.getMessage(),e);
+            logger.error("decrypt is error,[md5_token + \"|\" + mobile_device_num] is ={}",temp);
             return null;
         }
 

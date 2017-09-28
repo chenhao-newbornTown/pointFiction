@@ -8,8 +8,12 @@ public class Constant {
 
     public static final String BaseUrl = "http://www.indiandian.com";
 
-//    public static final String PicPath = "/data/pointPic";
-    public static final String PicPath = "E:\\xiaoshuo";
+    public static final String PushAppKey ="59afbd23734be41458000481";
+    public static final String PushAppMasterSecret ="822bsm0q9a8p0itubi1ndcyjmqoau4hr";
+
+
+    public static final String PicPath = "/data/pointPic";
+//    public static final String PicPath = "E:\\xiaoshuo";
 
     public static final long REDIS_1_DAYS = 60 * 24 * 1;
     public static final long REDIS_7_DAYS = 60 * 24 * 7;

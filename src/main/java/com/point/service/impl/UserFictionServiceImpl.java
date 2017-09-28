@@ -9,6 +9,7 @@ import com.point.mongo.PicRepostitory;
 import com.point.mongo.UserFictionRepository;
 import com.point.redis.UserFictionRedis;
 import com.point.service.UserFictionService;
+import javafx.scene.shape.Circle;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -483,8 +484,66 @@ public class UserFictionServiceImpl implements UserFictionService {
             logger.error("updateFictionPic is error,fiction_id={},fiction_pic_path{}", fiction_id, fiction_pic_path);
             return false;
         }
+    }
+
+    public void insertDataForPush(String fiction_id, Long user_read_line, String device_token,String mobile_device_num) {
+
+        mongoTemplate.upsert(new Query(Criteria.where("mobile_device_num").is(mobile_device_num)), Update.update("fiction_id", Long.parseLong(fiction_id)).set("user_read_line", user_read_line).set("device_token",device_token).set("push_num",1), DataForPush.class);
+    }
+
+    public void updatePushNum(String mobile_device_num){
+        mongoTemplate.upsert(new Query(Criteria.where("mobile_device_num").is(mobile_device_num)), Update.update("push_num",1), DataForPush.class);
+    }
 
 
+    public List<PushInfo> getpushInfo() {
+
+        List<DataForPush> dataForPushList = mongoTemplate.findAll(DataForPush.class);
+
+        List<PushInfo> list = new ArrayList<PushInfo>();
+
+        if (null != dataForPushList && dataForPushList.size() > 0) {
+
+            for (DataForPush dataForPush : dataForPushList) {
+
+                PushInfo pi = new PushInfo();
+
+                DBObject queryObject = new BasicDBObject();
+                queryObject.put("fiction_id", dataForPush.getFiction_id());
+
+                queryObject.put("actor_fiction_detail_index", new BasicDBObject("$gt",dataForPush.getUser_read_line()));
+                DBObject fields = new BasicDBObject();
+                fields.put("_id", false);
+                fields.put("actor_fiction_detail_index", true);
+                fields.put("actor_name", true);
+                fields.put("actor_fiction_detail", true);
+
+                FictionDetailBean fictionDetailBean = mongoTemplate.findOne(new BasicQuery(queryObject, fields).with(new Sort(new Sort.Order(Sort.Direction.ASC, "actor_fiction_detail_index"))).limit(1), FictionDetailBean.class);
+
+                if (null != fictionDetailBean) {
+                    pi.setActor_name(fictionDetailBean.getActor_name());
+                    pi.setActor_fiction_detail(fictionDetailBean.getActor_fiction_detail());
+                    pi.setFiction_detail_index(fictionDetailBean.getActor_fiction_detail_index());
+                    pi.setDevice_token(dataForPush.getDevice_token());
+                    FictionBean fictionBean = mongoTemplate.findOne(new Query(Criteria.where("fiction_id").is(dataForPush.getFiction_id())), FictionBean.class);
+
+                    fictionBean.setUser_read_line(fictionDetailBean.getActor_fiction_detail_index());
+                    pi.setFiction_name(fictionBean.getFiction_name());
+                    pi.setFictionBean(fictionBean);
+                    pi.setMobile_device_num(dataForPush.getMobile_device_num());
+                    pi.setPush_num(dataForPush.getPush_num());
+                    list.add(pi);
+                }
+            }
+
+        }
+        return list;
+    }
+
+
+    public void updateDataForPush(String mobile_device_num, long user_read_line, long fiction_id,int push_num) {
+
+        mongoTemplate.upsert(new Query(Criteria.where("mobile_device_num").is(mobile_device_num).and("fiction_id").is(fiction_id)), Update.update("user_read_line", user_read_line).set("push_num",push_num), DataForPush.class);
     }
 
 

@@ -21,10 +21,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileInputStream;
@@ -154,19 +151,23 @@ public class FictionController extends BaseController {
     /**
      * 更新所有的小说入redis
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/uploadredis")
-    public void flushRedisAndUpdateData() {
+    @RequestMapping(method = RequestMethod.POST, value = "/uploadredis")
+    public void flushRedisAndUpdateData(@RequestParam("upload") String upload) {
 
-        fictionService.deleteRedisBykey("fiction_idlist_all");
-        fictionService.deleteRedisBykey("fiction_info_all");
-        fictionService.deleteRedisBykey("fiction_info_deatil_");
-        fictionService.deleteRedisBykey("fiction_page_info_");
-        fictionService.deleteRedisBykey("fiction_sensitivewords");
-        List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
-        //小说具体内容存储到redis
-        fictionService.insertFictionListToRedis("fiction_info_deatil_", "20",fiction_id_List);
-        fictionService.getMongoSensitiveWordsToRedis("fiction_sensitivewords");
-        fictionService.setFictionInfoAll();
+        if(upload.equals("FS7MzIsUQhfRH4DwfHsk")){
+            fictionService.deleteRedisBykey("fiction_idlist_all");
+            fictionService.deleteRedisBykey("fiction_info_all");
+            fictionService.deleteRedisBykey("fiction_info_deatil_");
+            fictionService.deleteRedisBykey("fiction_page_info_");
+            fictionService.deleteRedisBykey("fiction_sensitivewords");
+            List<Long> fiction_id_List =  fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
+            //小说具体内容存储到redis
+            fictionService.insertFictionListToRedis("fiction_info_deatil_", "20",fiction_id_List);
+            fictionService.getMongoSensitiveWordsToRedis("fiction_sensitivewords");
+            fictionService.setFictionInfoAll();
+        }
+
+
     }
 
     /**

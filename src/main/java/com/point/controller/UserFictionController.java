@@ -1,28 +1,18 @@
 package com.point.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.point.constant.Constant;
 import com.point.entity.*;
 import com.point.service.FictionService;
 import com.point.service.UserFictionService;
 import com.point.service.UserService;
 import com.point.util.PublicUtil;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.json.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -273,9 +263,39 @@ public class UserFictionController extends BaseController {
             user_read_line = Long.parseLong(request.getParameter("user_read_line"));
         }
 
-        userFictionService.updateUserLatestFictionInfo(fiction_id, uid, user_read_line);
+        if(StringUtils.isNotEmpty(uid)){
+            userFictionService.updateUserLatestFictionInfo(fiction_id, uid, user_read_line);
+        }
+
+        String device_token =request.getParameter("device_token");
+
+        if(StringUtils.isNotEmpty(device_token)&&StringUtils.isNotEmpty(fiction_id)){
+
+            String mobile_device_num = request.getParameter("mobile_device_num");
+
+            userFictionService.insertDataForPush(fiction_id,user_read_line,device_token,mobile_device_num);
+        }
 
         return returnJsonData(Constant.DataDefault, "", "");
+    }
+
+
+    /**
+     * 推送用户的次数归零
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,value = "/updatebadge")
+    @ResponseBody
+    public String updatePsuhNum(HttpServletRequest request){
+
+        String mobile_device_num = request.getParameter("mobile_device_num");
+
+        userFictionService.updatePushNum(mobile_device_num);
+
+        return returnJsonData(Constant.DataDefault,"","");
+
+
     }
 
     /**
@@ -434,13 +454,8 @@ public class UserFictionController extends BaseController {
     public String getFictionEndDeatil(HttpServletRequest request) {
 
         String fiction_id = request.getParameter("fiction_id");
-        // long fiction_line_num = Long.parseLong(request.getParameter("fiction_line_num"));
 
         long page_num = 20;
-
-//        long start_fiction_page_num = (fiction_line_num / page_num) + 1;
-//
-//        long fiction_detail_num = (fiction_line_num / page_num) * page_num;
 
         List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionDeatil(fiction_id);//userFictionService.getFictionEndDeatil(fiction_id, fiction_detail_num);
 
@@ -486,9 +501,6 @@ public class UserFictionController extends BaseController {
 
 
         int page_num = 20;
-
-        //   long start_fiction_detail_num = (fiction_page_num - 1) * page_num;
-        //   long end_fiction_detail_num = start_fiction_detail_num + page_num;
 
         List<FictionDetailBean> fictionDetailBeanList = userFictionService.getFictionDeatil(fiction_id);//getFictionPreviousDetailFromMongo(fiction_id, start_fiction_detail_num, end_fiction_detail_num);
 
@@ -784,7 +796,6 @@ public class UserFictionController extends BaseController {
 
         if (fictionDetailStatus && fictionStatus) {
 
-//            if (fiction_status.equals("2")) {
             if (fictionService.getFictionStatus(fiction_id)) {
                 String key = "fiction_info_deatil_";
 
@@ -831,14 +842,15 @@ public class UserFictionController extends BaseController {
     }
 
 
+    /**
+     * 用户上传小说封面图
+     * @param request
+     * @param files
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/useruploadpic")
     @ResponseBody
     public String uploadFictionPic(HttpServletRequest request, @RequestParam("pic") MultipartFile[] files) {
-
-//        MultipartResolver resolver = new CommonsMultipartResolver(request.getSession().getServletContext());
-//        MultipartHttpServletRequest multipartRequest = resolver.resolveMultipart(request);
-//        DefaultMultipartHttpServletRequest defaultMultipartHttpServletRequest = new DefaultMultipartHttpServletRequest(multipartRequest);
-//        MultiValueMap<String, MultipartFile> fileMap = defaultMultipartHttpServletRequest.getMultiFileMap();
 
         MultipartFile file = files[0];//multipartRequest.getFile("pic");
 

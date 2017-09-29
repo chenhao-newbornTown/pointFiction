@@ -96,7 +96,7 @@ public class WebController {
         modelAndView.addObject("fictionBeanList", fictionBeanList);
         modelAndView.addObject("baseurl", BaseUrl);
         modelAndView.addObject("uid", "888888");
-        modelAndView.addObject("fictionBeanListSize",fictionBeanList.size());
+        modelAndView.addObject("fictionBeanListSize", fictionBeanList.size());
         return modelAndView;
     }
 
@@ -107,7 +107,7 @@ public class WebController {
      * @return
      */
     @RequestMapping("/searchhotfictionlist")
-    public ModelAndView searchHotFictionList(FictionBean fictionBean,HttpServletRequest request) {
+    public ModelAndView searchHotFictionList(FictionBean fictionBean, HttpServletRequest request) {
 
         String fiction_name = fictionBean.getFiction_name();
         String fiction_author_name = fictionBean.getFiction_author_name();
@@ -126,7 +126,7 @@ public class WebController {
         }
 
 
-        queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
+        queryObject.put("status", new BasicDBObject("$ne", Constant.FictionStatusDeatilError));
 
         List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
@@ -135,7 +135,7 @@ public class WebController {
         modelAndView.addObject("fictionBean", fictionBean);
         modelAndView.addObject("baseurl", BaseUrl);
         modelAndView.addObject("uid", "888888");
-        modelAndView.addObject("fictionBeanListSize",request.getParameter("fictionBeanListSize"));
+        modelAndView.addObject("fictionBeanListSize", request.getParameter("fictionBeanListSize"));
         return modelAndView;
     }
 
@@ -151,7 +151,14 @@ public class WebController {
     @RequestMapping("/changefictionstatus")
     public ModelAndView changeFictionStatus(FictionBean fictionBean, @RequestParam("fiction_id_jsp") long fiction_id_jsp, @RequestParam("fiction_status_jsp") int fiction_status_jsp) {
 
-        mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(fiction_id_jsp)), Update.update("fiction_status", fiction_status_jsp), FictionBean.class);
+
+        if (fiction_status_jsp == 1) {
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(fiction_id_jsp)), Update.update("fiction_status", fiction_status_jsp).set("hot_fiction_time", 1L), FictionBean.class);
+        }
+        if (fiction_status_jsp == 2) {
+            mongoTemplate.updateFirst(new Query(Criteria.where("fiction_id").is(fiction_id_jsp)), Update.update("fiction_status", fiction_status_jsp).set("hot_fiction_time", System.currentTimeMillis()), FictionBean.class);
+        }
+
 
         String fiction_name = fictionBean.getFiction_name();
         String fiction_author_name = fictionBean.getFiction_author_name();
@@ -168,7 +175,7 @@ public class WebController {
         if (fiction_status < 999) {
             queryObject.put("fiction_status", fiction_status);
         }
-        queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
+        queryObject.put("status", new BasicDBObject("$ne", Constant.FictionStatusDeatilError));
         List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
         ModelAndView modelAndView = new ModelAndView("getHotFictionList");
@@ -192,6 +199,7 @@ public class WebController {
 
     /**
      * 上传图片
+     *
      * @param request
      * @return
      */
@@ -269,13 +277,14 @@ public class WebController {
 
         ModelAndView modelAndView = new ModelAndView("editFictionAll");
         modelAndView.addObject("msg", "上传成功!!!");
-        modelAndView.addObject("addOrUpdate","add");
+        modelAndView.addObject("addOrUpdate", "add");
 
         return modelAndView;
     }
 
     /**
      * 更新小说的图片或者内容
+     *
      * @param request
      * @return
      */
@@ -360,16 +369,16 @@ public class WebController {
     @RequestMapping("/delfiction")
     public ModelAndView delFiction(FictionBean fictionBean, @RequestParam("id") String id, @RequestParam("fiction_id") long fiction_id, @RequestParam("fiction_pic_path") String fiction_pic_path, @RequestParam("type") String type, @RequestParam("del_status") boolean del_status) {
 
-        if (type.equals("fiction")&&!del_status) {//小说作者和admin的id不同
+        if (type.equals("fiction") && !del_status) {//小说作者和admin的id不同
             mongoTemplate.updateFirst(new Query(Criteria.where("id").is(new ObjectId(id))), Update.update("status", Constant.FictionStatusDeatilError).set("fiction_pic_path", "default.png").set("fiction_status", 0), FictionBean.class);
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(fiction_id)), FictionDetailBean.class);//删除小说内容
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(fiction_id)), FictionActorBean.class);//删除小说角色
-           // mongoTemplate.remove(new Query(Criteria.where("pic_name").is(fiction_pic_path)), PicBean.class);//删除小说图片
+            // mongoTemplate.remove(new Query(Criteria.where("pic_name").is(fiction_pic_path)), PicBean.class);//删除小说图片
         } else if (type.equals("pic")) {
             mongoTemplate.updateFirst(new Query(Criteria.where("id").is(new ObjectId(id))), Update.update("status", Constant.FictionStatusPicError).set("fiction_pic_path", "default.png").set("fiction_status", 0), FictionBean.class);
-           // mongoTemplate.remove(new Query(Criteria.where("pic_name").is(fiction_pic_path)), PicBean.class);//删除小说图片
-        }else if(type.equals("fiction")&&del_status){//小说作者和admin的id相同
-            mongoTemplate.remove(new Query(Criteria.where("id").is(new ObjectId(id))),FictionBean.class);
+            // mongoTemplate.remove(new Query(Criteria.where("pic_name").is(fiction_pic_path)), PicBean.class);//删除小说图片
+        } else if (type.equals("fiction") && del_status) {//小说作者和admin的id相同
+            mongoTemplate.remove(new Query(Criteria.where("id").is(new ObjectId(id))), FictionBean.class);
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(fiction_id)), FictionDetailBean.class);//删除小说内容
             mongoTemplate.remove(new Query(Criteria.where("fiction_id").is(fiction_id)), FictionActorBean.class);//删除小说角色
         }
@@ -391,7 +400,7 @@ public class WebController {
             queryObject.put("fiction_status", fiction_status);
         }
 
-        queryObject.put("status",new BasicDBObject("$ne",Constant.FictionStatusDeatilError));
+        queryObject.put("status", new BasicDBObject("$ne", Constant.FictionStatusDeatilError));
         List<FictionBean> fictionBeanList = mongoTemplate.find(new BasicQuery(queryObject).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
         ModelAndView modelAndView = new ModelAndView("getHotFictionList");

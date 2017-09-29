@@ -40,6 +40,16 @@ public class FictionBean {
 
     private String user_like_count_status;//0,未点赞，1，已点赞
 
+    private long hot_fiction_time;
+
+    public long getHot_fiction_time() {
+        return hot_fiction_time;
+    }
+
+    public void setHot_fiction_time(long hot_fiction_time) {
+        this.hot_fiction_time = hot_fiction_time;
+    }
+
     public long getUser_read_line() {
         return user_read_line;
     }

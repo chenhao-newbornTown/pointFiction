@@ -127,7 +127,8 @@ public class FictionServiceImpl implements FictionService {
     @Override
     public List<Long> insertAllFictionIdListToRedis(String key) {
 
-        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_status").is(2)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_status").is(2)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "hot_fiction_time")))
+                .with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
         List<Long> fiction_id_List = new ArrayList<Long>();
 
@@ -144,7 +145,8 @@ public class FictionServiceImpl implements FictionService {
     }
 
     public void setFictionInfoAll(){
-        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_status").is(2)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
+        List<FictionBean> fictionBeanList = mongoTemplate.find(new Query(Criteria.where("fiction_status").is(2)).with(new Sort(new Sort.Order(Sort.Direction.DESC, "hot_fiction_time")))
+                .with(new Sort(new Sort.Order(Sort.Direction.DESC, "update_time"))), FictionBean.class);
 
         Map<String, FictionBean> fictionid_Maps = new HashMap<String, FictionBean>();
 

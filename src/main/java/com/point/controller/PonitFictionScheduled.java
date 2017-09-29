@@ -51,11 +51,11 @@ public class PonitFictionScheduled {
     public void executePutFictionInfoToRedis() {
 
         fictionService.deleteRedisBykey("fiction_info_all");
-
-        fictionService.setFictionInfoAll();
         fictionService.deleteRedisBykey("fiction_idlist_all");
         fictionService.deleteRedisBykey("fiction_info_deatil_");
         fictionService.deleteRedisBykey("fiction_page_info_");
+
+        fictionService.setFictionInfoAll();
         List<Long> fiction_id_List = fictionService.insertAllFictionIdListToRedis("fiction_idlist_all");
         //小说具体内容存储到redis
         fictionService.insertFictionListToRedis("fiction_info_deatil_", "20", fiction_id_List);
@@ -65,8 +65,8 @@ public class PonitFictionScheduled {
 
 
 
-    //@Scheduled(cron = "0 0 09,12,15,18,21 * * ?")
-   @Scheduled(cron = "*/30 * * * * ?")
+    @Scheduled(cron = "0 0 09,12,15,18,21 * * ?")
+   //@Scheduled(cron = "*/30 * * * * ?")
     public void push() throws Exception {
 
         List<PushInfo> list = userFictionService.getpushInfo();

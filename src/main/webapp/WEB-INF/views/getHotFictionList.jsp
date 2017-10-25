@@ -148,7 +148,11 @@
 
             <display:column style="width:8%" title="数据">阅读&nbsp;&nbsp;<c:out
                     value="${fb.read_count}"/>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;赞&nbsp;&nbsp;<c:out
-                    value="${fb.like_count}"/></display:column>
+                    value="${fb.like_count}"/>
+                <br>
+                <br>
+                <a href="#">http://indiandian.com/userfiction/getfictiondetail?fiction_id=<c:out value="${fb.fiction_id}"/>&fiction_page_num=1</a>
+            </display:column>
 
 
             <display:column style="width:5%" title="状态">
